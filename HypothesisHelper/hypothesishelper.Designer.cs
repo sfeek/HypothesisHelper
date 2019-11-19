@@ -181,7 +181,7 @@
             this.lblPredMean.TabIndex = 7;
             this.lblPredMean.Text = "Predicted Mean";
             // 
-            // Hypothesistester
+            // Hypothesishelper
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -195,9 +195,9 @@
             this.Controls.Add(this.btnCalculate);
             this.Controls.Add(this.gbData);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Name = "Hypothesistester";
+            this.Name = "Hypothesishelper";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Hypothesis Helper v2.25";
+            this.Text = "Hypothesis Helper v2.30";
             this.gbData.ResumeLayout(false);
             this.gbData.PerformLayout();
             this.grpResults.ResumeLayout(false);

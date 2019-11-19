@@ -81,25 +81,11 @@ namespace HypothesisHelper
             int i;
             Pair minmax = GetMinMax(buffer, count);
 
-            double max_range_value;
-            double min_range_value;
-
             double[] output = new double[count];
-
-            if (Math.Abs(minmax.min) > minmax.max)
-            {
-                max_range_value = Math.Abs(minmax.min);
-                min_range_value = minmax.min;
-            }
-            else
-            {
-                max_range_value = minmax.max;
-                min_range_value = -minmax.max;
-            }
 
             for ( i=0; i<count; i++)
             {
-                output[i] = 2 * buffer[i] / (max_range_value - min_range_value);
+                output[i] = (buffer[i] - minmax.min) / (minmax.max - minmax.min);
             }
 
             return output;

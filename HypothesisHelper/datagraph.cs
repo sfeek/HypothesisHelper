@@ -36,9 +36,9 @@ namespace HypothesisHelper
             XYchart.ChartAreas["ChartArea1"].AxisX.Interval = 0.2;
             XYchart.ChartAreas["ChartArea1"].AxisY.Interval = 0.2;
             XYchart.ChartAreas["ChartArea1"].AxisX.Maximum = 1.0;
-            XYchart.ChartAreas["ChartArea1"].AxisX.Minimum = -1.0;
+            XYchart.ChartAreas["ChartArea1"].AxisX.Minimum = 0.0;
             XYchart.ChartAreas["ChartArea1"].AxisY.Maximum = 1.0;
-            XYchart.ChartAreas["ChartArea1"].AxisY.Minimum = -1.0;
+            XYchart.ChartAreas["ChartArea1"].AxisY.Minimum = 0.0;
 
             series = XYchart.Series.Add("X-Y Plot");
             series.ChartType = SeriesChartType.Point;
