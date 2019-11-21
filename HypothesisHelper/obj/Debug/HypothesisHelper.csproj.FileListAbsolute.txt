@@ -4,11 +4,10 @@ C:\SourceCode\HypothesisHelper\HypothesisHelper\bin\Debug\HypothesisHelper.appli
 C:\SourceCode\HypothesisHelper\HypothesisHelper\bin\Debug\HypothesisHelper.exe
 C:\SourceCode\HypothesisHelper\HypothesisHelper\bin\Debug\HypothesisHelper.pdb
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.Datagraph.resources
+C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.Hypothesishelper.resources
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.Properties.Resources.resources
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.csproj.GenerateResource.cache
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.exe.manifest
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.application
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.exe
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.pdb
-C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.Hypothesishelper.resources
-C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.csprojAssemblyReference.cache

@@ -56,6 +56,11 @@ namespace HypothesisHelper
                 txtAData.Text = String.Empty;
                 txtBData.Text = String.Empty;
                 rtbResults.Text = String.Empty;
+                if (dg != null)
+                {
+                    dg.Close();
+                    dg.Dispose();
+                }
             }
         }
 

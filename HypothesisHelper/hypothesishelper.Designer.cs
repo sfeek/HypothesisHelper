@@ -197,7 +197,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Hypothesishelper";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Hypothesis Helper v2.30";
+            this.Text = "Hypothesis Helper v2.31";
             this.gbData.ResumeLayout(false);
             this.gbData.PerformLayout();
             this.grpResults.ResumeLayout(false);
