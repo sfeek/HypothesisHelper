@@ -11,3 +11,4 @@ C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.exe.m
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.application
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.exe
 C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.pdb
+C:\SourceCode\HypothesisHelper\HypothesisHelper\obj\Debug\HypothesisHelper.csprojAssemblyReference.cache

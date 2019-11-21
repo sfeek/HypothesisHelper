@@ -18,8 +18,6 @@ namespace HypothesisHelper
             Globals.mainform = this; // Set global variable to allow other classes access to the form
 
             gbData_SizeChanged(null, null); // Make Data Container control resize once to set initial sizes and locations
-
-
         }
 
         // Make sure Data Container controls are positioned correctly
@@ -239,10 +237,10 @@ namespace HypothesisHelper
             writecolortext(String.Format("{0:G6} - {1:G6}", clA, cuA), Color.Yellow, true);
 
             writeblankline();
-            writekeyvalue("Sample A SD  = ", "G6", SDA);
+            writekeyvalue("Sample A SD = ", "G6", SDA);
 
             writeblankline();
-            writekeyvalue("Sample A Standard Error  = ", "G6", SEA);
+            writekeyvalue("Sample SE A = ", "G6", SEA);
 
             writeblankline();
             writeblankline();
@@ -355,10 +353,10 @@ namespace HypothesisHelper
             writecolortext(String.Format("{0:G6} - {1:G6}", clA, cuA), Color.Yellow, true);
 
             writeblankline();
-            writekeyvalue("Sample A SD  = ", "G6", SDA);
+            writekeyvalue("Sample A SD = ", "G6", SDA);
 
             writeblankline();
-            writekeyvalue("Sample A Standard Error  = ", "G6", SEA);
+            writekeyvalue("Sample SE A = ", "G6", SEA);
 
             writeblankline();
             writeblankline();
@@ -433,6 +431,7 @@ namespace HypothesisHelper
             int countA = 0;
             int countB = 0;
             double p, avgA, avgB, SDA, SDB, SEA, SEB;
+            double SED, SDD, cuAD, clAD, MoD;
             double sig2P, sig1P;
             double r,pr,tr,sr;
             
@@ -475,6 +474,7 @@ namespace HypothesisHelper
             clB = avgB - Z * (SDB / Math.Sqrt(countB));
             SEA = mf.StandardError(bufferA, countA);
             SEB = mf.StandardError(bufferB, countB);
+
 
             writecolortext("P-Value criteria for FALSE null hypothesis < ", Color.Cyan, false);
             writecolortext(String.Format("{0:G6}", clevel), Color.Yellow, true);
@@ -535,9 +535,26 @@ namespace HypothesisHelper
                 writekeyvalue("Sample SD % Change = ", "0.#", Math.Abs(mf.PerDiff(SDA, SDB)), "-", "%");
             }
 
+            if (countA == countB)
+            {
+                SED = mf.SEofDifferences(bufferA, bufferB, countA);
+                SDD = mf.SDofDifferences(bufferA, bufferB, countA);
+                MoD = mf.MeanofDifferences(bufferA, bufferB, countA);
+
+                cuAD = MoD + Z * (SDD / Math.Sqrt(countA));
+                clAD = MoD - Z * (SDD / Math.Sqrt(countA));
+
+                writeblankline();
+                writekeyvalue("Mean of Sample Differences = ", "G6", MoD);
+                writekeyvalue("SD of Sample Differences = ", "G6", SDD);
+                writekeyvalue("SE of Sample Differences = ", "G6", SED);
+                writecolortext(String.Format("Sample Differences {0}% CI = ", (1.0 - clevel) * 100), Color.Green, false);
+                writecolortext(String.Format("{0:G6} - {1:G6}", clAD, cuAD), Color.Yellow, true);
+            }
+
             writeblankline();
-            writekeyvalue("Sample A Standard Error  = ", "G6", SEA);
-            writekeyvalue("Sample B Standard Error  = ", "G6", SEB);
+            writekeyvalue("Sample SE A = ", "G6", SEA);
+            writekeyvalue("Sample SE B = ", "G6", SEB);
 
             writeblankline();
             writeblankline();
@@ -808,8 +825,8 @@ namespace HypothesisHelper
             }
 
             writeblankline();
-            writekeyvalue("Sample A Standard Error  = ", "G6", SEA);
-            writekeyvalue("Sample B Standard Error  = ", "G6", SEB);
+            writekeyvalue("Sample SE A = ", "G6", SEA);
+            writekeyvalue("Sample SE B = ", "G6", SEB);
 
             writeblankline();
             writeblankline();

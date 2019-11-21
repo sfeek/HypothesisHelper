@@ -75,6 +75,48 @@ namespace HypothesisHelper
             return SDSamp(buffer, count) / Math.Sqrt(count);
         }
 
+        // Calculate Standard Deviation of Differences
+        public double SDofDifferences(double[] array1, double[] array2, int count)
+        {
+            int i;
+            double[] diff = new double[count];
+
+            for ( i=0; i<count; i++)
+            {
+                diff[i] = array1[i] - array2[i];
+            }
+
+            return SDSamp(diff, count);
+        }
+
+        // Calculate Standard Error of Differences
+        public double SEofDifferences(double[] array1, double[] array2, int count)
+        {
+            int i;
+            double[] diff = new double[count];
+
+            for (i = 0; i < count; i++)
+            {
+                diff[i] = array1[i] - array2[i];
+            }
+
+            return SDSamp(diff, count) / Math.Sqrt(count);
+        }
+
+        // Calculate Mean of Differences
+        public double MeanofDifferences(double[] array1, double[] array2, int count)
+        {
+            int i;
+            double[] diff = new double[count];
+
+            for (i = 0; i < count; i++)
+            {
+                diff[i] = array1[i] - array2[i];
+            }
+
+            return Avg(diff, count);
+        }
+
         // Normalize Array
         public double[] Normalize(double [] buffer, int count)
         {
