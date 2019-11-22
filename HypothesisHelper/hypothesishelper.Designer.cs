@@ -42,6 +42,8 @@
             this.lblConfLevel = new System.Windows.Forms.Label();
             this.txtPredMean = new System.Windows.Forms.TextBox();
             this.lblPredMean = new System.Windows.Forms.Label();
+            this.chkOutlier = new System.Windows.Forms.CheckBox();
+            this.chkPaired = new System.Windows.Forms.CheckBox();
             this.gbData.SuspendLayout();
             this.grpResults.SuspendLayout();
             this.SuspendLayout();
@@ -61,7 +63,7 @@
             this.gbData.TabIndex = 0;
             this.gbData.TabStop = false;
             this.gbData.Text = "Data";
-            this.gbData.SizeChanged += new System.EventHandler(this.gbData_SizeChanged);
+            this.gbData.SizeChanged += new System.EventHandler(this.GbData_SizeChanged);
             // 
             // lblBData
             // 
@@ -107,7 +109,7 @@
             this.btnCalculate.TabIndex = 2;
             this.btnCalculate.Text = "Calculate";
             this.btnCalculate.UseVisualStyleBackColor = true;
-            this.btnCalculate.Click += new System.EventHandler(this.btnCalculate_Click);
+            this.btnCalculate.Click += new System.EventHandler(this.BtnCalculate_Click);
             // 
             // btnClear
             // 
@@ -117,7 +119,7 @@
             this.btnClear.TabIndex = 3;
             this.btnClear.Text = "Clear Data && Results";
             this.btnClear.UseVisualStyleBackColor = true;
-            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            this.btnClear.Click += new System.EventHandler(this.BtnClear_Click);
             // 
             // grpResults
             // 
@@ -147,7 +149,7 @@
             // 
             // txtConfLevel
             // 
-            this.txtConfLevel.Location = new System.Drawing.Point(527, 18);
+            this.txtConfLevel.Location = new System.Drawing.Point(674, 31);
             this.txtConfLevel.Name = "txtConfLevel";
             this.txtConfLevel.Size = new System.Drawing.Size(51, 20);
             this.txtConfLevel.TabIndex = 4;
@@ -157,7 +159,7 @@
             // lblConfLevel
             // 
             this.lblConfLevel.AutoSize = true;
-            this.lblConfLevel.Location = new System.Drawing.Point(431, 21);
+            this.lblConfLevel.Location = new System.Drawing.Point(578, 35);
             this.lblConfLevel.Name = "lblConfLevel";
             this.lblConfLevel.Size = new System.Drawing.Size(90, 13);
             this.lblConfLevel.TabIndex = 5;
@@ -165,7 +167,7 @@
             // 
             // txtPredMean
             // 
-            this.txtPredMean.Location = new System.Drawing.Point(672, 18);
+            this.txtPredMean.Location = new System.Drawing.Point(674, 8);
             this.txtPredMean.Name = "txtPredMean";
             this.txtPredMean.Size = new System.Drawing.Size(100, 20);
             this.txtPredMean.TabIndex = 6;
@@ -175,17 +177,39 @@
             // lblPredMean
             // 
             this.lblPredMean.AutoSize = true;
-            this.lblPredMean.Location = new System.Drawing.Point(584, 21);
+            this.lblPredMean.Location = new System.Drawing.Point(586, 11);
             this.lblPredMean.Name = "lblPredMean";
             this.lblPredMean.Size = new System.Drawing.Size(82, 13);
             this.lblPredMean.TabIndex = 7;
             this.lblPredMean.Text = "Predicted Mean";
+            // 
+            // chkOutlier
+            // 
+            this.chkOutlier.AutoSize = true;
+            this.chkOutlier.Location = new System.Drawing.Point(434, 31);
+            this.chkOutlier.Name = "chkOutlier";
+            this.chkOutlier.Size = new System.Drawing.Size(107, 17);
+            this.chkOutlier.TabIndex = 8;
+            this.chkOutlier.Text = "Outlier Removal?";
+            this.chkOutlier.UseVisualStyleBackColor = true;
+            // 
+            // chkPaired
+            // 
+            this.chkPaired.AutoSize = true;
+            this.chkPaired.Location = new System.Drawing.Point(434, 12);
+            this.chkPaired.Name = "chkPaired";
+            this.chkPaired.Size = new System.Drawing.Size(88, 17);
+            this.chkPaired.TabIndex = 9;
+            this.chkPaired.Text = "Paired Data?";
+            this.chkPaired.UseVisualStyleBackColor = true;
             // 
             // Hypothesishelper
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
+            this.Controls.Add(this.chkPaired);
+            this.Controls.Add(this.chkOutlier);
             this.Controls.Add(this.lblPredMean);
             this.Controls.Add(this.txtPredMean);
             this.Controls.Add(this.lblConfLevel);
@@ -197,7 +221,8 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Hypothesishelper";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Hypothesis Helper v2.40";
+            this.Text = "Hypothesis Helper v2.50";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Hypothesishelper_FormClosing);
             this.gbData.ResumeLayout(false);
             this.gbData.PerformLayout();
             this.grpResults.ResumeLayout(false);
@@ -221,6 +246,8 @@
         private System.Windows.Forms.Label lblConfLevel;
         private System.Windows.Forms.TextBox txtPredMean;
         private System.Windows.Forms.Label lblPredMean;
+        private System.Windows.Forms.CheckBox chkOutlier;
+        private System.Windows.Forms.CheckBox chkPaired;
     }
 }
 

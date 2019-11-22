@@ -43,6 +43,15 @@ namespace HypothesisHelper
             return total / count;
         }
 
+        // Calculate median
+        public double Median(double[] buffer, int count)
+        {
+            double[] srt = (double[])buffer.Clone();
+
+            Array.Sort(srt);
+            return srt[count / 2];
+        }
+
         // Calculate Standard Deviation of Population
         public double SDPop(double[] buffer, int count)
         {
@@ -83,7 +92,7 @@ namespace HypothesisHelper
 
             for ( i=0; i<count; i++)
             {
-                diff[i] = array1[i] - array2[i];
+                diff[i] = array2[i] - array1[i];
             }
 
             return SDSamp(diff, count);
@@ -97,7 +106,7 @@ namespace HypothesisHelper
 
             for (i = 0; i < count; i++)
             {
-                diff[i] = array1[i] - array2[i];
+                diff[i] = array2[i] - array1[i];
             }
 
             return SDSamp(diff, count) / Math.Sqrt(count);
@@ -111,13 +120,13 @@ namespace HypothesisHelper
 
             for (i = 0; i < count; i++)
             {
-                diff[i] = array1[i] - array2[i];
+                diff[i] = array2[i] - array1[i];
             }
 
             return Avg(diff, count);
         }
 
-        // Normalize Array
+        // Normalize Array 0 - 1
         public double[] Normalize(double [] buffer, int count)
         {
             int i;
@@ -247,8 +256,8 @@ namespace HypothesisHelper
 
             if (Double.IsInfinity(value) || Double.IsNaN(value)) return 1.0;
 
-            Globals.mainform.writekeyvalue("T = ","G6", welch_t_statistic);
-            Globals.mainform.writekeyvalue("df = ", "G6", dof);
+            Globals.mainform.Writekeyvalue("T = ","G6", welch_t_statistic);
+            Globals.mainform.Writekeyvalue("df = ", "G6", dof);
 
             double beta = Lgamma(a) + 0.57236494292470009 - Lgamma(a + 0.5);
             double acu = 0.1E-14;
@@ -364,12 +373,11 @@ namespace HypothesisHelper
                 usv2 += (array2[x] - fmean2) * (array2[x] - fmean2);
             }
 
-            usv1 = usv1 / (array1_size - 1);
-            usv2 = usv2 / (array2_size - 1);
+            usv1 /= (array1_size - 1);
+            usv2 /= (array2_size - 1);
 
             double welch_t_statistic = (fmean1 - fmean2) / Math.Sqrt(usv1 / array1_size + usv2 / array2_size);
-            double dof = Math.Pow((usv1 / array1_size + usv2 / array2_size), 2.0) / ((usv1 * usv1) / (array1_size * array1_size * (array1_size - 1)) +
-                (usv2 * usv2) / (array2_size * array2_size * (array2_size - 1)));
+            double dof = Math.Pow((usv1 / array1_size + usv2 / array2_size), 2.0) / ((usv1 * usv1) / (array1_size * array1_size * (array1_size - 1)) + (usv2 * usv2) / (array2_size * array2_size * (array2_size - 1)));
 
             return PfromT(welch_t_statistic, dof);
         }
@@ -464,7 +472,7 @@ namespace HypothesisHelper
         }
 
         // Remove Outlier values from an array
-        public int RemoveOutliers(ref double[] inp, int n, double sensitivity)
+        public int RemoveOutliersUnpaired(ref double[] inp, int n, double sensitivity)
         {
             int c = 0;
             int i;
@@ -477,12 +485,45 @@ namespace HypothesisHelper
                 test = n * Erfc(Math.Abs(inp[i] - a) / std);
 
                 if (test < sensitivity)
-                    Globals.mainform.writekeyvalue(String.Format("Threw Out #{0} -> ",i), "G", inp[i]);
+                    Globals.mainform.Writekeyvalue(String.Format("Threw Out #{0} -> ",i+1), "G", inp[i]);
                 else
                     inp[c++] = inp[i];
 	        }
 
 	        return c;
+        }
+
+        // Remove Outlier values from two arrays
+        public int RemoveOutliersPaired(ref double[] inp1, ref double[] inp2, int n, double sensitivity)
+        {
+            int c = 0;
+            int i;
+            double testa,testb;
+            double a = Avg(inp1, n);
+            double stda = SDSamp(inp1, n);
+            double b = Avg(inp2, n);
+            double stdb = SDSamp(inp2, n);
+
+
+            for (i = 0; i < n; i++)
+            {
+                testa = n * Erfc(Math.Abs(inp1[i] - a) / stda);
+                testb = n * Erfc(Math.Abs(inp2[i] - b) / stdb);
+
+                if (testa < sensitivity || testb < sensitivity)
+                {
+                    Globals.mainform.Writecolortext(String.Format("Threw Out Pair #{0} -> ", i + 1), Color.Green, false);
+                    Globals.mainform.Writecolortext(String.Format("{0:G6} , {1:G6}", inp1[i], inp2[i]), Color.Yellow, true);
+                }
+                else
+                {
+                    inp1[c] = inp1[i];
+                    inp2[c] = inp2[i];
+                    c++;
+                }
+            }
+
+            return c;
         }
 
         // Calculate Error Function
