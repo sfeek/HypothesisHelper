@@ -458,7 +458,6 @@ namespace HypothesisHelper
                 clAD = MoD - Z * (SDD / Math.Sqrt(countA));
 
                 Writeblankline();
-                Writekeyvalue("Mean of Sample Differences = ", "G6", MoD);
                 Writekeyvalue("SD of Sample Differences = ", "G6", SDD);
                 Writekeyvalue("SE of Sample Differences = ", "G6", SED);
                 Writecolortext(String.Format("Sample Differences {0}% CI = ", (1.0 - clevel) * 100), Color.Green, false);
