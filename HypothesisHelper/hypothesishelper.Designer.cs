@@ -221,7 +221,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Hypothesishelper";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Hypothesis Helper v2.50";
+            this.Text = "Hypothesis Helper v2.51";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Hypothesishelper_FormClosing);
             this.gbData.ResumeLayout(false);
             this.gbData.PerformLayout();

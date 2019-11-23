@@ -177,7 +177,7 @@ namespace HypothesisHelper
         void OneSample(double clevel, double mean, double ccfs)
         {
             int countA;
-            double p, avgA, SDA,SEA;
+            double p, avgA, SDA, SEA, SDAP;
             double sig2P, sig1P;
 
             MathFunctions.Pair minmaxA;
@@ -222,6 +222,7 @@ namespace HypothesisHelper
 
             minmaxA = mf.GetMinMax(bufferA, countA);
             SDA = mf.SDSamp(bufferA, countA);
+            SDAP = mf.SDPop(bufferA, countA);
             cuA = avgA + Z * (SDA / Math.Sqrt(countA));
             clA = avgA - Z * (SDA / Math.Sqrt(countA));
             SEA = mf.StandardError(bufferA, countA);
@@ -260,6 +261,7 @@ namespace HypothesisHelper
             Writeblankline();
             Writekeyvalue("Sample SD A = ", "G6", SDA);
             Writekeyvalue("Sample SE A = ", "G6", SEA);
+            Writekeyvalue("Population SD A = ", "G6", SDAP);
 
             Writeblankline();
             Writeblankline();
@@ -303,7 +305,7 @@ namespace HypothesisHelper
         {
             int countA;
             int countB;
-            double p, avgA, avgB, SDA, SDB, SEA, SEB;
+            double p, avgA, avgB, SDA, SDB, SEA, SEB, SDAP, SDBP;
             double SED, SDD, cuAD, clAD, MoD;
             double sig2P, sig1P;
             double r, pr, tr, sr;
@@ -386,6 +388,9 @@ namespace HypothesisHelper
             minmaxB = mf.GetMinMax(bufferB, countB);
             SDA = mf.SDSamp(bufferA, countA);
             SDB = mf.SDSamp(bufferB, countB);
+            SDAP = mf.SDPop(bufferA, countA);
+            SDBP = mf.SDPop(bufferB, countB);
+
             cuA = avgA + Z * (SDA / Math.Sqrt(countA));
             clA = avgA - Z * (SDA / Math.Sqrt(countA));
             cuB = avgB + Z * (SDB / Math.Sqrt(countB));
@@ -435,6 +440,8 @@ namespace HypothesisHelper
             Writeblankline();
             Writekeyvalue("Sample SD A = ", "G6", SDA);
             Writekeyvalue("Sample SD B = ", "G6", SDB);
+            Writekeyvalue("Population SD A = ", "G6", SDAP);
+            Writekeyvalue("Population SD B = ", "G6", SDBP);
 
             if (SDA < SDB)
             {
