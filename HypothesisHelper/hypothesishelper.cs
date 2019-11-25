@@ -238,16 +238,18 @@ namespace HypothesisHelper
             Writekeyvalue("Sample Mean A = ", "G6", avgA);
             Writeblankline();
             Writekeyvalue("Sample Median A = ", "G6", mf.Median(bufferA, countA));
-            Writeblankline();
+
 
             if (mean < avgA)
             {
+                Writeblankline();
                 Writekeyvalue("Sample A Mean Difference = ", "G6", Math.Abs(avgA - mean), "+");
                 Writekeyvalue("Sample A Mean % Change = ", "0.#", Math.Abs(mf.PerDiff(mean, avgA)), "+", "%");
             }
 
             if (mean > avgA)
             {
+                Writeblankline();
                 Writekeyvalue("Sample A Mean Difference = ", "G6", Math.Abs(avgA - mean), "-");
                 Writekeyvalue("Sample A Mean % Change = ", "0.#", Math.Abs(mf.PerDiff(mean, avgA)), "-", "%");
             }
@@ -274,7 +276,6 @@ namespace HypothesisHelper
             sig1P = mf.Critz(p * 0.5);
 
             Writeblankline();
-
             Writecolortext("Null Hypothesis is", Color.Green, false);
             if (p <= clevel)
                 Writecolortext(" FALSE ", Color.Cyan, false);
@@ -286,7 +287,6 @@ namespace HypothesisHelper
             Writekeyvalue(String.Format("Sigma Level {0} ", (sig2P < 5.99) ? "=" : ">"), "0.#", sig2P);
 
             Writeblankline();
-
             Writecolortext("Null Hypothesis is", Color.Green, false);
             if (0.5 * p <= clevel)
                 Writecolortext(" FALSE ", Color.Cyan, false);
@@ -417,16 +417,18 @@ namespace HypothesisHelper
             Writeblankline();
             Writekeyvalue("Sample Median A = ", "G6", mf.Median(bufferA, countA));
             Writekeyvalue("Sample Median B = ", "G6", mf.Median(bufferB, countB));
-            Writeblankline();
+
 
             if (avgA < avgB)
             {
+                Writeblankline();
                 Writekeyvalue("Sample Mean Difference = ", "G6", Math.Abs(avgB - avgA), "+");
                 Writekeyvalue("Sample Mean % Change = ", "0.#", Math.Abs(mf.PerDiff(avgA, avgB)), "+", "%");
             }
 
             if (avgA > avgB)
             {
+                Writeblankline();
                 Writekeyvalue("Sample Mean Difference = ", "G6", Math.Abs(avgB - avgA), "-");
                 Writekeyvalue("Sample Mean % Change = ", "0.#", Math.Abs(mf.PerDiff(avgA, avgB)), "-", "%");
             }
@@ -444,17 +446,18 @@ namespace HypothesisHelper
             Writekeyvalue("Sample SD B = ", "G6", SDB);
             Writekeyvalue("Population SD A = ", "G6", SDAP);
             Writekeyvalue("Population SD B = ", "G6", SDBP);
-            Writeblankline();
-
+ 
 
             if (SDA < SDB)
             {
+                Writeblankline();
                 Writekeyvalue("Sample SD Difference = ", "G6", Math.Abs(SDB - SDA), "+");
                 Writekeyvalue("Sample SD % Change = ", "0.#", Math.Abs(mf.PerDiff(SDA, SDB)), "+", "%");
             }
 
             if (SDA > SDB)
             {
+                Writeblankline();
                 Writekeyvalue("Sample SD Difference = ", "G6", Math.Abs(SDB - SDA), "-");
                 Writekeyvalue("Sample SD % Change = ", "0.#", Math.Abs(mf.PerDiff(SDA, SDB)), "-", "%");
             }
@@ -491,8 +494,6 @@ namespace HypothesisHelper
                 sig1P = mf.Critz(p * 0.5);
 
                 Writeblankline();
-
- 
                 Writecolortext("Null Hypothesis is", Color.Green, false);
                 if (p <= clevel)
                     Writecolortext(" FALSE ", Color.Cyan, false);
@@ -504,7 +505,6 @@ namespace HypothesisHelper
                 Writekeyvalue(String.Format("Sigma Level {0} ", (sig2P < 5.99) ? "=" : ">"), "0.#", sig2P);
 
                 Writeblankline();
-
                 Writecolortext("Null Hypothesis is", Color.Green, false);
                 if (0.5 * p <= clevel)
                     Writecolortext(" FALSE ", Color.Cyan, false);
@@ -546,7 +546,6 @@ namespace HypothesisHelper
                 sig1P = mf.Critz(p * 0.5);
 
                 Writeblankline();
-
                 Writecolortext("Null Hypothesis is", Color.Green, false);
                 if (p <= clevel)
                     Writecolortext(" FALSE ", Color.Cyan, false);
@@ -558,7 +557,6 @@ namespace HypothesisHelper
                 Writekeyvalue(String.Format("Sigma Level {0} ", (sig2P < 5.99) ? "=" : ">"), "0.#", sig2P);
 
                 Writeblankline();
-
                 Writecolortext("Null Hypothesis is", Color.Green, false);
                 if (0.5 * p <= clevel)
                     Writecolortext(" FALSE ", Color.Cyan, false);
@@ -600,7 +598,6 @@ namespace HypothesisHelper
                 Writecolortext(" Correlation", Color.Green, true);
 
                 Writeblankline();
-
                 Writekeyvalue("R-Value = ", "G6", r);
                 Writekeyvalue("Coefficient of Determination = ", "G6", r * r);
                 Writekeyvalue("P-Value = ", "G6", pr);
