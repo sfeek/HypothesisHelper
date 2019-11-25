@@ -214,7 +214,6 @@ namespace HypothesisHelper
             {
                 Writeblankline();
                 Writecolortext(" *** Raw Data *** ", Color.Red, true);
-
             }
 
             Z = mf.Critz(clevel / 2);
@@ -260,8 +259,11 @@ namespace HypothesisHelper
 
             Writeblankline();
             Writekeyvalue("Sample SD A = ", "G6", SDA);
-            Writekeyvalue("Sample SE A = ", "G6", SEA);
             Writekeyvalue("Population SD A = ", "G6", SDAP);
+
+            Writeblankline();
+            Writekeyvalue("Sample SE A = ", "G6", SEA);
+            
 
             Writeblankline();
             Writeblankline();
@@ -604,7 +606,7 @@ namespace HypothesisHelper
                 sr = mf.Critz(pr);
                 Writekeyvalue(String.Format("Sigma Level {0} ", (sr < 5.99) ? "=" : ">"), "0.#", sr);
 
-                if (pr < clevel)
+                if (pr <= clevel)
                     Writecolortext("P-Value is Significant", Color.Green, true);
                 else
                     Writecolortext("P-Value is Not Significant", Color.Green, true);
