@@ -444,6 +444,8 @@ namespace HypothesisHelper
             Writekeyvalue("Sample SD B = ", "G6", SDB);
             Writekeyvalue("Population SD A = ", "G6", SDAP);
             Writekeyvalue("Population SD B = ", "G6", SDBP);
+            Writeblankline();
+
 
             if (SDA < SDB)
             {
