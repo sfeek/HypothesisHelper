@@ -600,15 +600,24 @@ namespace HypothesisHelper
                 Writeblankline();
                 Writekeyvalue("R-Value = ", "G6", r);
                 Writekeyvalue("Coefficient of Determination = ", "G6", r * r);
+                Writeblankline();
                 Writekeyvalue("P-Value = ", "G6", pr);
 
                 sr = mf.Critz(pr);
                 Writekeyvalue(String.Format("Sigma Level {0} ", (sr < 5.99) ? "=" : ">"), "0.#", sr);
 
+                Writeblankline();
+
                 if (pr <= clevel)
-                    Writecolortext("P-Value is Significant", Color.Green, true);
+                {
+                    Writecolortext("P-Value is", Color.Green, false);
+                    Writecolortext(" Significant", Color.Cyan, true);
+                }
                 else
-                    Writecolortext("P-Value is Not Significant", Color.Green, true);
+                {
+                    Writecolortext("P-Value is", Color.Green, false);
+                    Writecolortext(" Not Significant", Color.Cyan, true);
+                }
             }
         }
 
