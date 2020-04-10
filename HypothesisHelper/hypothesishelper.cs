@@ -309,7 +309,7 @@ namespace HypothesisHelper
             int countB;
             double p, avgA, avgB, SDA, SDB, SEA, SEB, SDAP, SDBP;
             double SED, SDD, cuAD, clAD, MoD;
-            double sig2P, sig1P;
+            double sig2P, sig1P, p1, p2;
             double r, pr, tr, sr;
 
             MathFunctions.Pair minmaxA;
@@ -487,6 +487,15 @@ namespace HypothesisHelper
 
             if (!chkPaired.Checked)
             {
+                Writecolortext("*** Power Test UnPaired ***", Color.Blue, true);
+
+                p1 = mf.PowerOneTailed(avgA, SDAP, clevel, avgB, countB);
+                p2 = mf.PowerTwoTailed(avgA, SDAP, clevel, avgB, countB);
+                Writekeyvalue("Power One Sided = ", "G6", p1);
+                Writekeyvalue("Power Two Sided = ", "G6", p2);
+
+                Writeblankline();
+
                 Writecolortext("*** Welch t-test UnPaired ***", Color.Blue, true);
 
                 p = mf.PValueUnpaired(bufferA, countA, bufferB, countB);

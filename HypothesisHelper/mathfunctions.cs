@@ -344,6 +344,25 @@ namespace HypothesisHelper
             return value;
         }
 
+        // Calculate Power One Tailed
+        public double PowerOneTailed(double mean1, double std, double clevel, double mean2, double size)
+        {
+            double Z = Critz(clevel);
+            double p = Z - (mean2 - mean1) / (std / Math.Sqrt(size));
+
+            return (1 - Poz(p));
+        }
+
+        // Calculate Power Two Tailed
+        public double PowerTwoTailed(double mean1, double std, double clevel, double mean2, double size)
+        {
+            double Z = Critz(clevel / 2);
+            double p1 = 1 - Poz((Z - (mean2 - mean1) / (std / Math.Sqrt(size))));
+            double p2 = 1 - Poz((-Z - (mean2 - mean1) / (std / Math.Sqrt(size))));
+ 
+            return p1 + 1 - p2;
+        }
+
         // Calculate P-Value for unpaired Data
         public double PValueUnpaired(double[] array1, int array1_size, double[] array2, int array2_size)
         {
