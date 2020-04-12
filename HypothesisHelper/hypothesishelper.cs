@@ -487,15 +487,6 @@ namespace HypothesisHelper
 
             if (!chkPaired.Checked)
             {
-                Writecolortext("*** Power Test UnPaired ***", Color.Blue, true);
-
-                p1 = mf.PowerOneTailed(avgA, SDAP, clevel, avgB, countB);
-                p2 = mf.PowerTwoTailed(avgA, SDAP, clevel, avgB, countB);
-                Writekeyvalue("Power One Sided = ", "G6", p1);
-                Writekeyvalue("Power Two Sided = ", "G6", p2);
-
-                Writeblankline();
-
                 Writecolortext("*** Welch t-test UnPaired ***", Color.Blue, true);
 
                 p = mf.PValueUnpaired(bufferA, countA, bufferB, countB);
@@ -511,8 +502,16 @@ namespace HypothesisHelper
                 Writecolortext("for Two Sided test", Color.Green, true);
   
                 Writekeyvalue("P-Value Two Sided = ", "G6", p);
-                Writekeyvalue(String.Format("Sigma Level {0} ", (sig2P < 5.99) ? "=" : ">"), "0.#", sig2P);
+                if (p <= clevel)
+                {
+                    p2 = mf.PowerTwoTailed(avgA, SDAP, clevel, avgB, countB);
+                    Writekeyvalue("Power Two Sided = ", "G6", p2);
 
+                    Writeblankline();
+                }
+
+                Writekeyvalue(String.Format("Sigma Level {0} ", (sig2P < 5.99) ? "=" : ">"), "0.#", sig2P);
+                
                 Writeblankline();
                 Writecolortext("Null Hypothesis is", Color.Green, false);
                 if (0.5 * p <= clevel)
@@ -525,8 +524,16 @@ namespace HypothesisHelper
                     Writekeyvalue("P-Value One Sided A < B = ", "G6", 0.5 * p);
                 else
                     Writekeyvalue("P-Value One Sided A > B = ", "G6", 0.5 * p);
+
+                if (0.5 * p <= clevel)
+                {
+                    p1 = 1 - mf.PowerOneTailed(avgA, SDAP, clevel, avgB, countB);
+                    Writekeyvalue("Power One Sided = ", "G6", p1);
+
+                    Writeblankline();
+                }
+
                 Writekeyvalue(String.Format("Sigma Level {0} ", (sig1P < 5.99) ? "=" : ">"), "0.#", sig1P);
-              
             }
             else
             {
