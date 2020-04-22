@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             this.XYchart = new System.Windows.Forms.DataVisualization.Charting.Chart();
             ((System.ComponentModel.ISupportInitialize)(this.XYchart)).BeginInit();
             this.SuspendLayout();
@@ -38,8 +38,8 @@
             this.XYchart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            chartArea1.Name = "ChartArea1";
-            this.XYchart.ChartAreas.Add(chartArea1);
+            chartArea3.Name = "ChartArea1";
+            this.XYchart.ChartAreas.Add(chartArea3);
             this.XYchart.Location = new System.Drawing.Point(12, 12);
             this.XYchart.Name = "XYchart";
             this.XYchart.Size = new System.Drawing.Size(460, 437);
@@ -54,7 +54,6 @@
             this.ClientSize = new System.Drawing.Size(484, 461);
             this.Controls.Add(this.XYchart);
             this.Name = "Datagraph";
-            this.Text = "Normalized A-B Scatter Plot";
             ((System.ComponentModel.ISupportInitialize)(this.XYchart)).EndInit();
             this.ResumeLayout(false);
 

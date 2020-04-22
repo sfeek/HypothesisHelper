@@ -163,6 +163,46 @@ namespace HypothesisHelper
             return XMxYMySum / Math.Sqrt(XMxSum * YMySum);
         }
 
+        // Calculate Slope of data
+        public double slope(double[] y, int array_size)
+        {
+            int x;
+            double a = 0, b, c = 0, d, b1 = 0, b2 = 0;
+            
+            for (x=1;x<array_size+1;x++ )
+            {
+                a += x * y[x-1];
+                b1 += x;
+                b2 += y[x - 1];
+                c += Math.Pow(x, 2);
+            }
+            a *= array_size;
+           
+            b = b1 * b2;
+
+            c *= array_size;
+
+            d = Math.Pow(b1, 2);
+
+            return (a - b) / (c - d);
+        }
+
+        public double intercept(double[] y, int array_size)
+        {
+            int x;
+            double e = 0, b = 0, f;
+
+            for (x=1;x<array_size+1;x++)
+            {
+                e += y[x - 1];
+                b += x;
+            }
+
+            f = slope(y, array_size) * b;
+
+            return (e - f) / array_size;
+        }
+
         // Calculate of P-Value from Z-Values
         public double Poz(double z)
         {

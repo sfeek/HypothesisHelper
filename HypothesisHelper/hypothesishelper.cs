@@ -8,7 +8,7 @@ namespace HypothesisHelper
     public partial class Hypothesishelper : Form
     {
         readonly MathFunctions mf = new MathFunctions();
-        private Datagraph dg;
+        private Datagraph dg,dgA,dgB;
 
         public Hypothesishelper()
         {
@@ -58,6 +58,16 @@ namespace HypothesisHelper
                     dg.Close();
                     dg.Dispose();
                 }
+                if (dgA != null)
+                {
+                    dgA.Close();
+                    dgA.Dispose();
+                }
+                if (dgB != null)
+                {
+                    dgB.Close();
+                    dgB.Dispose();
+                }
             }
         }
 
@@ -72,6 +82,16 @@ namespace HypothesisHelper
             {
                 dg.Close();
                 dg.Dispose();
+            }
+            if (dgA != null)
+            {
+                dgA.Close();
+                dgA.Dispose();
+            }
+            if (dgB != null)
+            {
+                dgB.Close();
+                dgB.Dispose();
             }
 
             try
@@ -176,7 +196,7 @@ namespace HypothesisHelper
         // Calculate One sided P-Value
         void OneSample(double clevel, double mean, double ccfs)
         {
-            int countA;
+            int countA,x,graph=0;
             double p, avgA, SDA, SEA, SDAP;
             double sig2P, sig1P;
 
@@ -194,6 +214,21 @@ namespace HypothesisHelper
             }
 
             countA = bufferA.Length;
+
+            double[] xpointsA = new double[countA];
+
+            for (x = 1; x < countA + 1; x++) xpointsA[x - 1] = x;
+
+            if (chkNormalize.Checked) graph = 2;
+            dgA = new Datagraph(graph,"Series Plot")
+            {
+                x = xpointsA,
+                y = bufferA,
+                count = countA,
+            };
+
+            dgA.SetPoints();
+            dgA.Visible = true;
 
             Writecolortext("P-Value criteria for FALSE null hypothesis < ", Color.Cyan, false);
             Writecolortext(String.Format("{0:G6}", clevel), Color.Yellow, true);
@@ -265,7 +300,10 @@ namespace HypothesisHelper
 
             Writeblankline();
             Writekeyvalue("Sample SE A = ", "G6", SEA);
-            
+
+            Writeblankline();
+            Writekeyvalue("Slope A = ", "G6", mf.slope(bufferA, countA));
+            Writekeyvalue("y-Intercept A = ","G6",mf.intercept(bufferA, countA));
 
             Writeblankline();
             Writeblankline();
@@ -307,6 +345,7 @@ namespace HypothesisHelper
         {
             int countA;
             int countB;
+            int x, graph = 0;
             double p, avgA, avgB, SDA, SDB, SEA, SEB, SDAP, SDBP;
             double SED, SDD, cuAD, clAD, MoD;
             double sig2P, sig1P, p1, p2;
@@ -461,7 +500,19 @@ namespace HypothesisHelper
                 Writekeyvalue("Sample SD Difference = ", "G6", Math.Abs(SDB - SDA), "-");
                 Writekeyvalue("Sample SD % Change = ", "0.#", Math.Abs(mf.PerDiff(SDA, SDB)), "-", "%");
             }
-            
+
+            if (SDAP < SDBP)
+            {
+                Writekeyvalue("Population SD Difference = ", "G6", Math.Abs(SDBP - SDAP), "+");
+                Writekeyvalue("Population SD % Change = ", "0.#", Math.Abs(mf.PerDiff(SDAP, SDBP)), "+", "%");
+            }
+
+            if (SDAP > SDBP)
+            {
+                Writekeyvalue("Population SD Difference = ", "G6", Math.Abs(SDBP - SDAP), "-");
+                Writekeyvalue("Population SD % Change = ", "0.#", Math.Abs(mf.PerDiff(SDAP, SDBP)), "-", "%");
+            }
+
             if (chkPaired.Checked)
             {
                 SED = mf.SEofDifferences(bufferA, bufferB, countA);
@@ -483,10 +534,46 @@ namespace HypothesisHelper
             Writekeyvalue("Sample SE B = ", "G6", SEB);
 
             Writeblankline();
+            Writekeyvalue("Slope A = ", "G6", mf.slope(bufferA, countA));
+            Writekeyvalue("y-Intercept A = ", "G6", mf.intercept(bufferA, countA));
+
+            Writeblankline();
+            Writekeyvalue("Slope B = ", "G6", mf.slope(bufferB, countB));
+            Writekeyvalue("y-Intercept B = ", "G6", mf.intercept(bufferB, countB));
+
+            Writeblankline();
             Writeblankline();
 
             if (!chkPaired.Checked)
             {
+                double[] xpointsA = new double[countA];
+                double[] xpointsB = new double[countB];
+
+                if (chkNormalize.Checked) graph = 2;
+
+                for (x = 1; x < countA + 1; x++) xpointsA[x - 1] = x;
+                for (x = 1; x < countB + 1; x++) xpointsB[x - 1] = x;
+
+                dgA = new Datagraph(graph,"A Series Plot")
+                {
+                    x = xpointsA,
+                    y = bufferA,
+                    count = countA,
+                };
+
+                dgB = new Datagraph(graph,"B Series Plot")
+                {
+                    x = xpointsB,
+                    y = bufferB,
+                    count = countB,
+                };
+
+                dgA.SetPoints();
+                dgA.Visible = true;
+
+                dgB.SetPoints();
+                dgB.Visible = true;
+
                 Writecolortext("*** Welch t-test UnPaired ***", Color.Blue, true);
 
                 p = mf.PValueUnpaired(bufferA, countA, bufferB, countB);
@@ -505,7 +592,7 @@ namespace HypothesisHelper
                 if (p <= clevel)
                 {
                     p2 = mf.PowerTwoTailed(avgA, SDAP, clevel, avgB, countB);
-                    Writekeyvalue("Power Two Sided = ", "G6", p2);
+                    Writekeyvalue("Power Two Sided = ", "F1", p2 * 100, "", "%");
 
                     Writeblankline();
                 }
@@ -528,7 +615,7 @@ namespace HypothesisHelper
                 if (0.5 * p <= clevel)
                 {
                     p1 = 1 - mf.PowerOneTailed(avgA, SDAP, clevel, avgB, countB);
-                    Writekeyvalue("Power One Sided = ", "G6", p1);
+                    Writekeyvalue("Power One Sided = ", "F1", p1 * 100, "", "%");
 
                     Writeblankline();
                 }
@@ -537,17 +624,15 @@ namespace HypothesisHelper
             }
             else
             {
-                if (dg != null)
-                {
-                    dg.Close();
-                    dg.Dispose();
-                }
+                graph = 1;
 
-                dg = new Datagraph
+                if (chkNormalize.Checked) graph = 3;
+
+                dg = new Datagraph(graph,"A/B Scatter Plot")
                 {
                     x = bufferA,
                     y = bufferB,
-                    count = countA
+                    count = countA,
                 };
 
                 dg.SetPoints();
@@ -644,6 +729,16 @@ namespace HypothesisHelper
             {
                 dg.Close();
                 dg.Dispose();
+            }
+            if (dgA != null)
+            {
+                dgA.Close();
+                dgA.Dispose();
+            }
+            if (dgB != null)
+            {
+                dgB.Close();
+                dgB.Dispose();
             }
         }
     }
