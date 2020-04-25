@@ -19,6 +19,12 @@ namespace HypothesisHelper
             public double min, max;
         }
 
+        public struct Bins
+        {
+            public double[] values, x;
+            public string[] xlabels;
+        }
+
         // Calculate Percent difference
         public double PerDiff(double f, double s)
         {
@@ -127,7 +133,7 @@ namespace HypothesisHelper
         }
 
         // Normalize Array 0 - 1
-        public double[] Normalize(double [] buffer, int count)
+        public double[] Normalize(double[] buffer, int count)
         {
             int i;
             Pair minmax = GetMinMax(buffer, count);
@@ -140,6 +146,68 @@ namespace HypothesisHelper
             }
 
             return output;
+        }
+
+        private double[] MakeBins(double[] buffer, int count)
+        {
+            int bins = (int)Math.Ceiling(Math.Pow(count, 1.0 / 3.0) * 2); // Rice's rule
+
+            Pair minmax = GetMinMax(buffer, count);
+
+            double width = (minmax.max - minmax.min) / bins; 
+
+            double[] intervals = new double[bins * 2]; 
+            intervals[0] = minmax.min;
+            intervals[1] = minmax.min + width;
+
+            for (int i = 2; i < intervals.Length - 1; i += 2)
+            {
+                intervals[i] = intervals[i - 1];
+                intervals[i + 1] = intervals[i] + width;
+            }
+
+            intervals[0] = Math.Floor(minmax.min);
+            intervals[intervals.Length - 1] = Math.Ceiling(minmax.max);
+
+            return intervals;
+        }
+
+        public Bins SortBins(double[] buffer, int count)
+        {
+            int i, x;
+
+            Bins b = new Bins();
+
+            int bins = (int)Math.Ceiling(Math.Pow(count, 1.0 / 3.0) * 2);
+
+            b.values = new double[bins];
+            b.x = new double[bins];
+            b.xlabels = new string[bins];
+
+            for (i = 0; i < bins; i++) b.values[i] = 0.0;
+
+            double[] intervals = MakeBins(buffer, count);
+
+            for (x = 0; x < count; x++)
+            {
+                double v = buffer[x];
+                for (i = 0; i < intervals.Length - 1; i += 2)
+                {
+                    if (v >= intervals[i] && v <= intervals[i + 1])
+                    {
+                        b.values[i / 2] += 1.0;
+                        break;
+                    }
+                }
+            }
+
+            for (i = 0; i < intervals.Length - 1; i += 2)
+            {
+                b.xlabels[i / 2] = String.Format("{0:G6}", ((intervals[i] + intervals[i + 1]) / 2));
+                b.x[i / 2] = i / 2;
+            }
+                
+            return b;
         }
 
         // Calculate R Pearson Correlation Coefficient

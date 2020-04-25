@@ -8,7 +8,7 @@ namespace HypothesisHelper
     public partial class Hypothesishelper : Form
     {
         readonly MathFunctions mf = new MathFunctions();
-        private Datagraph dg,dgA,dgB;
+        private Datagraph dg,dgA,dgB,hsA,hsB;
 
         public Hypothesishelper()
         {
@@ -68,6 +68,16 @@ namespace HypothesisHelper
                     dgB.Close();
                     dgB.Dispose();
                 }
+                if (hsA != null)
+                {
+                    hsA.Close();
+                    hsA.Dispose();
+                }
+                if (hsB != null)
+                {
+                    hsB.Close();
+                    hsB.Dispose();
+                }
             }
         }
 
@@ -92,6 +102,16 @@ namespace HypothesisHelper
             {
                 dgB.Close();
                 dgB.Dispose();
+            }
+            if (hsA != null)
+            {
+                hsA.Close();
+                hsA.Dispose();
+            }
+            if (hsB != null)
+            {
+                hsB.Close();
+                hsB.Dispose();
             }
 
             try
@@ -199,8 +219,10 @@ namespace HypothesisHelper
             int countA,x,graph=0;
             double p, avgA, SDA, SEA, SDAP;
             double sig2P, sig1P;
+            double[] xpointsA;
 
             MathFunctions.Pair minmaxA;
+            MathFunctions.Bins bins;
 
             double Z;
             double cuA, clA;
@@ -215,7 +237,19 @@ namespace HypothesisHelper
 
             countA = bufferA.Length;
 
-            double[] xpointsA = new double[countA];
+            bins = mf.SortBins(bufferA, countA);
+
+            hsA = new Datagraph(4, "Histogram Plot")
+            {
+                xlabels = bins.xlabels,
+                y = bins.values,
+                count = bins.values.Length,
+            };
+
+            hsA.SetPoints();
+            hsA.Visible = true;
+
+            xpointsA = new double[countA];
 
             for (x = 1; x < countA + 1; x++) xpointsA[x - 1] = x;
 
@@ -353,6 +387,8 @@ namespace HypothesisHelper
 
             MathFunctions.Pair minmaxA;
             MathFunctions.Pair minmaxB;
+            MathFunctions.Bins binsA;
+            MathFunctions.Bins binsB;
 
             double Z;
             double cuA, clA, cuB, clB;
@@ -384,6 +420,12 @@ namespace HypothesisHelper
                     MessageBox.Show("Paired data specified, but unequal number of A/B values entered", "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
+            }
+
+            if (countA < 2 || countB < 2)
+            {
+                MessageBox.Show("Data fields must contain at least two values", "Data Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
             }
 
             Writecolortext("P-Value criteria for FALSE null hypothesis < ", Color.Cyan, false);
@@ -544,36 +586,60 @@ namespace HypothesisHelper
             Writeblankline();
             Writeblankline();
 
+            double[] xpointsA = new double[countA];
+            double[] xpointsB = new double[countB];
+
+            if (chkNormalize.Checked) graph = 2;
+
+            for (x = 1; x < countA + 1; x++) xpointsA[x - 1] = x;
+            for (x = 1; x < countB + 1; x++) xpointsB[x - 1] = x;
+
+            dgA = new Datagraph(graph, "A Series Plot")
+            {
+                x = xpointsA,
+                y = bufferA,
+                count = countA,
+            };
+
+            dgB = new Datagraph(graph, "B Series Plot")
+            {
+                x = xpointsB,
+                y = bufferB,
+                count = countB,
+            };
+
+            dgA.SetPoints();
+            dgA.Visible = true;
+
+            dgB.SetPoints();
+            dgB.Visible = true;
+
+            binsA = mf.SortBins(bufferA, countA);
+
+            hsA = new Datagraph(4, "A Histogram Plot")
+            {
+                xlabels = binsA.xlabels,
+                y = binsA.values,
+                count = binsA.values.Length,
+            };
+
+            binsB = mf.SortBins(bufferB, countB);
+
+            hsB = new Datagraph(4, "B Histogram Plot")
+            {
+                xlabels = binsB.xlabels,
+                y = binsB.values,
+                count = binsB.values.Length,
+            };
+
+            hsA.SetPoints();
+            hsA.Visible = true;
+
+            hsB.SetPoints();
+            hsB.Visible = true;
+
             if (!chkPaired.Checked)
             {
-                double[] xpointsA = new double[countA];
-                double[] xpointsB = new double[countB];
-
-                if (chkNormalize.Checked) graph = 2;
-
-                for (x = 1; x < countA + 1; x++) xpointsA[x - 1] = x;
-                for (x = 1; x < countB + 1; x++) xpointsB[x - 1] = x;
-
-                dgA = new Datagraph(graph,"A Series Plot")
-                {
-                    x = xpointsA,
-                    y = bufferA,
-                    count = countA,
-                };
-
-                dgB = new Datagraph(graph,"B Series Plot")
-                {
-                    x = xpointsB,
-                    y = bufferB,
-                    count = countB,
-                };
-
-                dgA.SetPoints();
-                dgA.Visible = true;
-
-                dgB.SetPoints();
-                dgB.Visible = true;
-
                 Writecolortext("*** Welch t-test UnPaired ***", Color.Blue, true);
 
                 p = mf.PValueUnpaired(bufferA, countA, bufferB, countB);
@@ -739,6 +805,16 @@ namespace HypothesisHelper
             {
                 dgB.Close();
                 dgB.Dispose();
+            }
+            if (hsA != null)
+            {
+                hsA.Close();
+                hsA.Dispose();
+            }
+            if (hsB != null)
+            {
+                hsB.Close();
+                hsB.Dispose();
             }
         }
     }

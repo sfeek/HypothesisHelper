@@ -15,6 +15,7 @@ namespace HypothesisHelper
     {
         public double[] x { get; set; }
         public double[] y { get; set; }
+        public string[] xlabels { get; set; }
         public int count { get; set; }
         private int t { get; set; }
 
@@ -89,6 +90,13 @@ namespace HypothesisHelper
                     series.ChartType = SeriesChartType.Point;
                     break;
 
+                case 4: // Bar Chart
+                    XYchart.ChartAreas["ChartArea1"].AxisX.Title = "X";
+                    XYchart.ChartAreas["ChartArea1"].AxisY.Title = "Count";
+
+                    series = XYchart.Series.Add("X-Y Plot");
+                    series.ChartType = SeriesChartType.Column;
+                    break;
             }
         }
 
@@ -126,6 +134,22 @@ namespace HypothesisHelper
                         for (i = 0; i < count; i++)
                         {
                             series.Points.AddXY(xn[i], yn[i]);
+                        }
+                    }
+                    catch
+                    {
+                        DialogResult dialogResult = MessageBox.Show("Error creating Plot", "Chart Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    break;
+
+                case 4:
+                    try
+                    {
+                        XYchart.Series[0].Points.Clear();
+                        for (i = 0; i < count; i++)
+                        {
+                            series.Points.AddXY(xlabels[i], y[i]);
                         }
                     }
                     catch
