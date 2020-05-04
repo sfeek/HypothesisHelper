@@ -14,15 +14,22 @@ namespace HypothesisHelper
         private const double Z_EPSILON = 0.000001;
 
         // Structure for min max pairs
-        public struct Pair
+        public struct MMPair
         {
             public double min, max;
         }
 
-        public struct Bins
+        public struct HSBins
         {
             public double[] values, x;
             public string[] xlabels;
+        }
+
+        public struct SDBins
+        {
+            public double[] values;
+            public int count;
+            public int binsize;
         }
 
         // Calculate Percent difference
@@ -136,7 +143,7 @@ namespace HypothesisHelper
         public double[] Normalize(double[] buffer, int count)
         {
             int i;
-            Pair minmax = GetMinMax(buffer, count);
+            MMPair minmax = GetMinMax(buffer, count);
 
             double[] output = new double[count];
 
@@ -148,11 +155,40 @@ namespace HypothesisHelper
             return output;
         }
 
-        private double[] MakeBins(double[] buffer, int count)
+        public SDBins SDMakeBins(double[] buffer, int count)
+        {
+            int bins = (int)Math.Ceiling(Math.Pow(count, 1.0 / 3.0) * 2); // Rice's rule
+            int bin = 0,x,tbcount = 0,binsize;
+            SDBins b = new SDBins();
+
+            binsize = count / bins + 1;
+            b.binsize = binsize;
+            double[] tbuff = new double[binsize];
+            b.values = new double[bins + 2];
+
+            for (x = 0; x < count; x++)
+            {
+                tbuff[tbcount++] = buffer[x];
+                if (tbcount == binsize)
+                {
+                    b.values[bin++] = SDPop(tbuff, tbcount);
+                    tbcount = 0;
+                }
+                
+            }
+
+            if (x % binsize > 1) b.values[bin++] = SDPop(tbuff, tbcount);
+
+            b.count = bin;
+
+            return b;
+        }
+
+        private double[] HSMakeBins(double[] buffer, int count)
         {
             int bins = (int)Math.Ceiling(Math.Pow(count, 1.0 / 3.0) * 2); // Rice's rule
 
-            Pair minmax = GetMinMax(buffer, count);
+            MMPair minmax = GetMinMax(buffer, count);
 
             double width = (minmax.max - minmax.min) / bins; 
 
@@ -172,11 +208,11 @@ namespace HypothesisHelper
             return intervals;
         }
 
-        public Bins SortBins(double[] buffer, int count)
+        public HSBins SortBins(double[] buffer, int count)
         {
             int i, x;
 
-            Bins b = new Bins();
+            HSBins b = new HSBins();
 
             int bins = (int)Math.Ceiling(Math.Pow(count, 1.0 / 3.0) * 2);
 
@@ -186,7 +222,7 @@ namespace HypothesisHelper
 
             for (i = 0; i < bins; i++) b.values[i] = 0.0;
 
-            double[] intervals = MakeBins(buffer, count);
+            double[] intervals = HSMakeBins(buffer, count);
 
             for (x = 0; x < count; x++)
             {
@@ -545,10 +581,10 @@ namespace HypothesisHelper
            }
 
         // Calculate min and max of an array
-        public Pair GetMinMax(double[] arr, int n)
+        public MMPair GetMinMax(double[] arr, int n)
             {
 
-            Pair minmax;
+            MMPair minmax;
             int i;
 
             if (n % 2 == 0)

@@ -8,7 +8,7 @@ namespace HypothesisHelper
     public partial class Hypothesishelper : Form
     {
         readonly MathFunctions mf = new MathFunctions();
-        private Datagraph dg,dgA,dgB,hsA,hsB;
+        private Datagraph dg,dgA,dgB,hsA,hsB,sdA,sdB;
 
         public Hypothesishelper()
         {
@@ -78,6 +78,16 @@ namespace HypothesisHelper
                     hsB.Close();
                     hsB.Dispose();
                 }
+                if (sdA != null)
+                {
+                    sdA.Close();
+                    sdA.Dispose();
+                }
+                if (sdB != null)
+                {
+                    sdB.Close();
+                    sdB.Dispose();
+                }
             }
         }
 
@@ -112,6 +122,16 @@ namespace HypothesisHelper
             {
                 hsB.Close();
                 hsB.Dispose();
+            }
+            if (sdA != null)
+            {
+                sdA.Close();
+                sdA.Dispose();
+            }
+            if (sdB != null)
+            {
+                sdB.Close();
+                sdB.Dispose();
             }
 
             try
@@ -148,6 +168,8 @@ namespace HypothesisHelper
                     return;
                 }
 
+                if (chkPaired.Checked == true) chkPaired.Checked = false;
+                
                 rtbResults.Text = String.Empty;
 
                 OneSample(clevel, predmean, ccfs);
@@ -221,8 +243,9 @@ namespace HypothesisHelper
             double sig2P, sig1P;
             double[] xpointsA;
 
-            MathFunctions.Pair minmaxA;
-            MathFunctions.Bins bins;
+            MathFunctions.MMPair minmaxA;
+            MathFunctions.HSBins HSbins;
+            MathFunctions.SDBins SDbins;
 
             double Z;
             double cuA, clA;
@@ -237,13 +260,13 @@ namespace HypothesisHelper
 
             countA = bufferA.Length;
 
-            bins = mf.SortBins(bufferA, countA);
+            HSbins = mf.SortBins(bufferA, countA);
 
             hsA = new Datagraph(4, "Histogram Plot")
             {
-                xlabels = bins.xlabels,
-                y = bins.values,
-                count = bins.values.Length,
+                xlabels = HSbins.xlabels,
+                y = HSbins.values,
+                count = HSbins.values.Length,
             };
 
             hsA.SetPoints();
@@ -263,6 +286,23 @@ namespace HypothesisHelper
 
             dgA.SetPoints();
             dgA.Visible = true;
+
+            SDbins = mf.SDMakeBins(bufferA, countA);
+
+            xpointsA = new double[SDbins.count];
+
+            for (x = 1; x < SDbins.count + 1; x++) xpointsA[x - 1] = x * SDbins.binsize;
+
+            if (chkNormalize.Checked) graph = 2;
+            sdA = new Datagraph(graph, "Standard Deviation Plot")
+            {
+                x = xpointsA,
+                y = SDbins.values,
+                count = SDbins.count,
+            };
+
+            sdA.SetPoints();
+            sdA.Visible = true;
 
             Writecolortext("P-Value criteria for FALSE null hypothesis < ", Color.Cyan, false);
             Writecolortext(String.Format("{0:G6}", clevel), Color.Yellow, true);
@@ -385,10 +425,12 @@ namespace HypothesisHelper
             double sig2P, sig1P, p1, p2;
             double r, pr, tr, sr;
 
-            MathFunctions.Pair minmaxA;
-            MathFunctions.Pair minmaxB;
-            MathFunctions.Bins binsA;
-            MathFunctions.Bins binsB;
+            MathFunctions.MMPair minmaxA;
+            MathFunctions.MMPair minmaxB;
+            MathFunctions.HSBins binsA;
+            MathFunctions.HSBins binsB;
+            MathFunctions.SDBins SDbinsA;
+            MathFunctions.SDBins SDbinsB;
 
             double Z;
             double cuA, clA, cuB, clB;
@@ -638,6 +680,42 @@ namespace HypothesisHelper
             hsB.SetPoints();
             hsB.Visible = true;
 
+            SDbinsA = mf.SDMakeBins(bufferA, countA);
+
+            xpointsA = new double[SDbinsA.count];
+
+            for (x = 1; x < SDbinsA.count + 1; x++) xpointsA[x - 1] = x * SDbinsA.binsize;
+
+            if (chkNormalize.Checked) graph = 2;
+            sdA = new Datagraph(graph, "A Standard Deviation Plot")
+            {
+                x = xpointsA,
+                y = SDbinsA.values,
+                count = SDbinsA.count,
+            };
+
+            sdA.SetPoints();
+            sdA.Visible = true;
+
+            SDbinsB = mf.SDMakeBins(bufferB, countB);
+
+            xpointsA = new double[SDbinsB.count];
+
+            for (x = 1; x < SDbinsB.count + 1; x++) xpointsA[x - 1] = x * SDbinsB.binsize;
+
+            if (chkNormalize.Checked) graph = 2;
+            sdB = new Datagraph(graph, "B Standard Deviation Plot")
+            {
+                x = xpointsA,
+                y = SDbinsB.values,
+                count = SDbinsB.count,
+            };
+
+            sdB.SetPoints();
+            sdB.Visible = true;
+
+
+
             if (!chkPaired.Checked)
             {
                 Writecolortext("*** Welch t-test UnPaired ***", Color.Blue, true);
@@ -815,6 +893,16 @@ namespace HypothesisHelper
             {
                 hsB.Close();
                 hsB.Dispose();
+            }
+            if (sdA != null)
+            {
+                sdA.Close();
+                sdA.Dispose();
+            }
+            if (sdB != null)
+            {
+                sdB.Close();
+                sdB.Dispose();
             }
         }
     }

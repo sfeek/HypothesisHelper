@@ -35,11 +35,10 @@ namespace HypothesisHelper
             switch (type)
             {
                 case 0: // Line Chart
-                    XYchart.ChartAreas["ChartArea1"].AxisX.Title = "X";
-                    XYchart.ChartAreas["ChartArea1"].AxisY.Title = "Y";
+                    XYchart.ChartAreas["ChartArea1"].AxisX.Title = "Sample Number";
+                    XYchart.ChartAreas["ChartArea1"].AxisY.Title = "Value";
                     XYchart.ChartAreas["ChartArea1"].AxisX.TextOrientation = TextOrientation.Horizontal;
                     XYchart.ChartAreas["ChartArea1"].AxisX.TitleAlignment = StringAlignment.Center;
-                    XYchart.ChartAreas["ChartArea1"].AxisY.TextOrientation = TextOrientation.Horizontal;
                     XYchart.ChartAreas["ChartArea1"].AxisY.TitleAlignment = StringAlignment.Center;
                     series = XYchart.Series.Add("X-Y Plot");
                     series.ChartType = SeriesChartType.Line;
@@ -57,16 +56,12 @@ namespace HypothesisHelper
                     break;
 
                 case 2: // Normalized Line Chart
-                    XYchart.ChartAreas["ChartArea1"].AxisX.Title = "X";
-                    XYchart.ChartAreas["ChartArea1"].AxisY.Title = "Y";
+                    XYchart.ChartAreas["ChartArea1"].AxisX.Title = "Sample Number";
+                    XYchart.ChartAreas["ChartArea1"].AxisY.Title = "Normalized Value";
                     XYchart.ChartAreas["ChartArea1"].AxisX.TextOrientation = TextOrientation.Horizontal;
                     XYchart.ChartAreas["ChartArea1"].AxisX.TitleAlignment = StringAlignment.Center;
-                    XYchart.ChartAreas["ChartArea1"].AxisY.TextOrientation = TextOrientation.Horizontal;
                     XYchart.ChartAreas["ChartArea1"].AxisY.TitleAlignment = StringAlignment.Center;
-                    XYchart.ChartAreas["ChartArea1"].AxisX.Interval = 0.2;
                     XYchart.ChartAreas["ChartArea1"].AxisY.Interval = 0.2;
-                    XYchart.ChartAreas["ChartArea1"].AxisX.Maximum = 1.0;
-                    XYchart.ChartAreas["ChartArea1"].AxisX.Minimum = 0.0;
                     XYchart.ChartAreas["ChartArea1"].AxisY.Maximum = 1.0;
                     XYchart.ChartAreas["ChartArea1"].AxisY.Minimum = 0.0;
                     series = XYchart.Series.Add("X-Y Plot");
@@ -91,7 +86,7 @@ namespace HypothesisHelper
                     break;
 
                 case 4: // Bar Chart
-                    XYchart.ChartAreas["ChartArea1"].AxisX.Title = "X";
+                    XYchart.ChartAreas["ChartArea1"].AxisX.Title = "Range Average";
                     XYchart.ChartAreas["ChartArea1"].AxisY.Title = "Count";
 
                     series = XYchart.Series.Add("X-Y Plot");
@@ -103,6 +98,7 @@ namespace HypothesisHelper
         public void SetPoints()
         {
             int i;
+            double[] xn,yn;
 
             switch (t)
             {
@@ -123,10 +119,27 @@ namespace HypothesisHelper
                     }
                     break;
 
-                case 2: 
+                case 2:
+                    yn = mf.Normalize(y, y.Length);
+
+                    try
+                    {
+                        XYchart.Series[0].Points.Clear();
+                        for (i = 0; i < count; i++)
+                        {
+                            series.Points.AddXY(x[i], yn[i]);
+                        }
+                    }
+                    catch
+                    {
+                        DialogResult dialogResult = MessageBox.Show("Error creating Plot", "Chart Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    break;
+
                 case 3:  
-                    double[] xn = mf.Normalize(x, x.Length);
-                    double[] yn = mf.Normalize(y, y.Length);
+                    xn = mf.Normalize(x, x.Length);
+                    yn = mf.Normalize(y, y.Length);
 
                     try
                     {
