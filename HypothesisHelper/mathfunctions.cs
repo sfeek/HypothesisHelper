@@ -161,8 +161,11 @@ namespace HypothesisHelper
             int bin = 0,x,tbcount = 0,binsize;
             SDBins b = new SDBins();
 
-            binsize = count / bins + 1;
+            binsize = count / bins;
+            if (binsize < 2) binsize = 2;
+
             b.binsize = binsize;
+
             double[] tbuff = new double[binsize];
             b.values = new double[bins + 2];
 
