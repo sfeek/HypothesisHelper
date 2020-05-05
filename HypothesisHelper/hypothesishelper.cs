@@ -53,6 +53,8 @@ namespace HypothesisHelper
                 txtAData.Text = String.Empty;
                 txtBData.Text = String.Empty;
                 rtbResults.Text = String.Empty;
+                txtPredMean.Text = "0.0";
+
                 if (dg != null)
                 {
                     dg.Close();
@@ -260,49 +262,52 @@ namespace HypothesisHelper
 
             countA = bufferA.Length;
 
-            HSbins = mf.SortBins(bufferA, countA);
-
-            hsA = new Datagraph(4, "Histogram Plot")
+            if (chkShowGraphs.Checked == true)
             {
-                xlabels = HSbins.xlabels,
-                y = HSbins.values,
-                count = HSbins.values.Length,
-            };
+                HSbins = mf.SortBins(bufferA, countA);
 
-            hsA.SetPoints();
-            hsA.Visible = true;
+                hsA = new Datagraph(4, "Histogram Plot")
+                {
+                    xlabels = HSbins.xlabels,
+                    y = HSbins.values,
+                    count = HSbins.values.Length,
+                };
 
-            xpointsA = new double[countA];
+                hsA.SetPoints();
+                hsA.Visible = true;
 
-            for (x = 1; x < countA + 1; x++) xpointsA[x - 1] = x;
+                xpointsA = new double[countA];
 
-            if (chkNormalize.Checked) graph = 2;
-            dgA = new Datagraph(graph,"Series Plot")
-            {
-                x = xpointsA,
-                y = bufferA,
-                count = countA,
-            };
+                for (x = 1; x < countA + 1; x++) xpointsA[x - 1] = x;
 
-            dgA.SetPoints();
-            dgA.Visible = true;
+                if (chkNormalize.Checked) graph = 2;
+                dgA = new Datagraph(graph, "Series Plot")
+                {
+                    x = xpointsA,
+                    y = bufferA,
+                    count = countA,
+                };
 
-            SDbins = mf.SDMakeBins(bufferA, countA);
+                dgA.SetPoints();
+                dgA.Visible = true;
 
-            xpointsA = new double[SDbins.count];
+                SDbins = mf.SDMakeBins(bufferA, countA);
 
-            for (x = 1; x < SDbins.count + 1; x++) xpointsA[x - 1] = x * SDbins.binsize;
+                xpointsA = new double[SDbins.size];
 
-            if (chkNormalize.Checked) graph = 2;
-            sdA = new Datagraph(graph, "Standard Deviation Plot")
-            {
-                x = xpointsA,
-                y = SDbins.values,
-                count = SDbins.count,
-            };
+                for (x = 1; x < SDbins.size + 1; x++) xpointsA[x - 1] = x * SDbins.binsize;
 
-            sdA.SetPoints();
-            sdA.Visible = true;
+                if (chkNormalize.Checked) graph = 2;
+                sdA = new Datagraph(graph, "Standard Deviation Plot")
+                {
+                    x = xpointsA,
+                    y = SDbins.values,
+                    count = SDbins.size,
+                };
+
+                sdA.SetPoints();
+                sdA.Visible = true;
+            }
 
             Writecolortext("P-Value criteria for FALSE null hypothesis < ", Color.Cyan, false);
             Writecolortext(String.Format("{0:G6}", clevel), Color.Yellow, true);
@@ -376,8 +381,8 @@ namespace HypothesisHelper
             Writekeyvalue("Sample SE A = ", "G6", SEA);
 
             Writeblankline();
-            Writekeyvalue("Slope A = ", "G6", mf.slope(bufferA, countA));
-            Writekeyvalue("y-Intercept A = ","G6",mf.intercept(bufferA, countA));
+            Writekeyvalue("Slope A = ", "G6", mf.Slope(bufferA, countA));
+            Writekeyvalue("y-Intercept A = ","G6",mf.Intercept(bufferA, countA));
 
             Writeblankline();
             Writeblankline();
@@ -423,7 +428,7 @@ namespace HypothesisHelper
             double p, avgA, avgB, SDA, SDB, SEA, SEB, SDAP, SDBP;
             double SED, SDD, cuAD, clAD, MoD;
             double sig2P, sig1P, p1, p2;
-            double r, pr, tr, sr;
+            double r, pr, tr, sr, sp;
 
             MathFunctions.MMPair minmaxA;
             MathFunctions.MMPair minmaxB;
@@ -618,102 +623,105 @@ namespace HypothesisHelper
             Writekeyvalue("Sample SE B = ", "G6", SEB);
 
             Writeblankline();
-            Writekeyvalue("Slope A = ", "G6", mf.slope(bufferA, countA));
-            Writekeyvalue("y-Intercept A = ", "G6", mf.intercept(bufferA, countA));
+            Writekeyvalue("Slope A = ", "G6", mf.Slope(bufferA, countA));
+            Writekeyvalue("y-Intercept A = ", "G6", mf.Intercept(bufferA, countA));
 
             Writeblankline();
-            Writekeyvalue("Slope B = ", "G6", mf.slope(bufferB, countB));
-            Writekeyvalue("y-Intercept B = ", "G6", mf.intercept(bufferB, countB));
+            Writekeyvalue("Slope B = ", "G6", mf.Slope(bufferB, countB));
+            Writekeyvalue("y-Intercept B = ", "G6", mf.Intercept(bufferB, countB));
 
             Writeblankline();
             Writeblankline();
 
-            double[] xpointsA = new double[countA];
-            double[] xpointsB = new double[countB];
-
-            if (chkNormalize.Checked) graph = 2;
-
-            for (x = 1; x < countA + 1; x++) xpointsA[x - 1] = x;
-            for (x = 1; x < countB + 1; x++) xpointsB[x - 1] = x;
-
-            dgA = new Datagraph(graph, "A Series Plot")
+            if (chkShowGraphs.Checked == true)
             {
-                x = xpointsA,
-                y = bufferA,
-                count = countA,
-            };
 
-            dgB = new Datagraph(graph, "B Series Plot")
-            {
-                x = xpointsB,
-                y = bufferB,
-                count = countB,
-            };
+                double[] xpointsA = new double[countA];
+                double[] xpointsB = new double[countB];
 
-            dgA.SetPoints();
-            dgA.Visible = true;
+                if (chkNormalize.Checked) graph = 2;
 
-            dgB.SetPoints();
-            dgB.Visible = true;
+                for (x = 1; x < countA + 1; x++) xpointsA[x - 1] = x;
+                for (x = 1; x < countB + 1; x++) xpointsB[x - 1] = x;
 
-            binsA = mf.SortBins(bufferA, countA);
+                dgA = new Datagraph(graph, "A Series Plot")
+                {
+                    x = xpointsA,
+                    y = bufferA,
+                    count = countA,
+                };
 
-            hsA = new Datagraph(4, "A Histogram Plot")
-            {
-                xlabels = binsA.xlabels,
-                y = binsA.values,
-                count = binsA.values.Length,
-            };
+                dgB = new Datagraph(graph, "B Series Plot")
+                {
+                    x = xpointsB,
+                    y = bufferB,
+                    count = countB,
+                };
 
-            binsB = mf.SortBins(bufferB, countB);
+                dgA.SetPoints();
+                dgA.Visible = true;
 
-            hsB = new Datagraph(4, "B Histogram Plot")
-            {
-                xlabels = binsB.xlabels,
-                y = binsB.values,
-                count = binsB.values.Length,
-            };
+                dgB.SetPoints();
+                dgB.Visible = true;
 
-            hsA.SetPoints();
-            hsA.Visible = true;
+                binsA = mf.SortBins(bufferA, countA);
 
-            hsB.SetPoints();
-            hsB.Visible = true;
+                hsA = new Datagraph(4, "A Histogram Plot")
+                {
+                    xlabels = binsA.xlabels,
+                    y = binsA.values,
+                    count = binsA.values.Length,
+                };
 
-            SDbinsA = mf.SDMakeBins(bufferA, countA);
+                binsB = mf.SortBins(bufferB, countB);
 
-            xpointsA = new double[SDbinsA.count];
+                hsB = new Datagraph(4, "B Histogram Plot")
+                {
+                    xlabels = binsB.xlabels,
+                    y = binsB.values,
+                    count = binsB.values.Length,
+                };
 
-            for (x = 1; x < SDbinsA.count + 1; x++) xpointsA[x - 1] = x * SDbinsA.binsize;
+                hsA.SetPoints();
+                hsA.Visible = true;
 
-            if (chkNormalize.Checked) graph = 2;
-            sdA = new Datagraph(graph, "A Standard Deviation Plot")
-            {
-                x = xpointsA,
-                y = SDbinsA.values,
-                count = SDbinsA.count,
-            };
+                hsB.SetPoints();
+                hsB.Visible = true;
 
-            sdA.SetPoints();
-            sdA.Visible = true;
+                SDbinsA = mf.SDMakeBins(bufferA, countA);
 
-            SDbinsB = mf.SDMakeBins(bufferB, countB);
+                xpointsA = new double[SDbinsA.size];
 
-            xpointsA = new double[SDbinsB.count];
+                for (x = 1; x < SDbinsA.size + 1; x++) xpointsA[x - 1] = x * SDbinsA.binsize;
 
-            for (x = 1; x < SDbinsB.count + 1; x++) xpointsA[x - 1] = x * SDbinsB.binsize;
+                if (chkNormalize.Checked) graph = 2;
+                sdA = new Datagraph(graph, "A Standard Deviation Plot")
+                {
+                    x = xpointsA,
+                    y = SDbinsA.values,
+                    count = SDbinsA.size,
+                };
 
-            if (chkNormalize.Checked) graph = 2;
-            sdB = new Datagraph(graph, "B Standard Deviation Plot")
-            {
-                x = xpointsA,
-                y = SDbinsB.values,
-                count = SDbinsB.count,
-            };
+                sdA.SetPoints();
+                sdA.Visible = true;
 
-            sdB.SetPoints();
-            sdB.Visible = true;
+                SDbinsB = mf.SDMakeBins(bufferB, countB);
 
+                xpointsA = new double[SDbinsB.size];
+
+                for (x = 1; x < SDbinsB.size + 1; x++) xpointsA[x - 1] = x * SDbinsB.binsize;
+
+                if (chkNormalize.Checked) graph = 2;
+                sdB = new Datagraph(graph, "B Standard Deviation Plot")
+                {
+                    x = xpointsA,
+                    y = SDbinsB.values,
+                    count = SDbinsB.size,
+                };
+
+                sdB.SetPoints();
+                sdB.Visible = true;
+            }
 
 
             if (!chkPaired.Checked)
@@ -768,19 +776,22 @@ namespace HypothesisHelper
             }
             else
             {
-                graph = 1;
-
-                if (chkNormalize.Checked) graph = 3;
-
-                dg = new Datagraph(graph,"A/B Scatter Plot")
+                if (chkShowGraphs.Checked == true)
                 {
-                    x = bufferA,
-                    y = bufferB,
-                    count = countA,
-                };
+                    graph = 1;
 
-                dg.SetPoints();
-                dg.Visible = true;
+                    if (chkNormalize.Checked) graph = 3;
+
+                    dg = new Datagraph(graph, "A/B Scatter Plot")
+                    {
+                        x = bufferA,
+                        y = bufferB,
+                        count = countA,
+                    };
+
+                    dg.SetPoints();
+                    dg.Visible = true;
+                }
 
                 Writeblankline();
                 Writeblankline();
@@ -819,7 +830,7 @@ namespace HypothesisHelper
                 Writeblankline();
                 Writeblankline();
 
-                Writecolortext("*** Pearson Correlation Coefficient ***", Color.Blue, true);
+                Writecolortext("*** Pearson's Correlation Coefficient ***", Color.Blue, true);
 
                 r = mf.R(bufferA, bufferB, countA);
                 tr = r / Math.Sqrt((1 - r * r) / (countA - 2));
@@ -845,6 +856,54 @@ namespace HypothesisHelper
                 Writeblankline();
                 Writekeyvalue("R-Value = ", "G6", r);
                 Writekeyvalue("Coefficient of Determination = ", "G6", r * r);
+                Writeblankline();
+                Writekeyvalue("P-Value = ", "G6", pr);
+
+                sr = mf.Critz(pr);
+                Writekeyvalue(String.Format("Sigma Level {0} ", (sr < 5.99) ? "=" : ">"), "0.#", sr);
+
+                Writeblankline();
+
+                if (pr <= clevel)
+                {
+                    Writecolortext("P-Value is", Color.Green, false);
+                    Writecolortext(" Significant", Color.Cyan, true);
+                }
+                else
+                {
+                    Writecolortext("P-Value is", Color.Green, false);
+                    Writecolortext(" Not Significant", Color.Cyan, true);
+                }
+
+                Writeblankline();
+                Writeblankline();
+
+                Writecolortext("*** Spearman's Correlation Coefficient ***", Color.Blue, true);
+
+                sp = mf.R(mf.Rankify(bufferA), mf.Rankify(bufferB), countA);
+                tr = sp / Math.Sqrt((1 - sp * sp) / (countA - 2));
+                pr = mf.PfromT(tr, countA - 2);
+
+                Writeblankline();
+                Writecolortext("A to B has ", Color.Green, false);
+
+                if (sp == 0.0) Writecolortext("No", Color.Cyan, false);
+                if (sp == 1.0) Writecolortext("Perfect Positive", Color.Cyan, false);
+                if (sp == -1.0) Writecolortext("Perfect Negative", Color.Cyan, false);
+
+                if (sp > 0.0 && sp < 0.3) Writecolortext("Weak Positive", Color.Cyan, false);
+                if (sp >= 0.3 && sp < 0.7) Writecolortext("Moderate Positive", Color.Cyan, false);
+                if (sp >= 0.7 && sp < 1.00) Writecolortext("Strong Positive", Color.Cyan, false);
+
+                if (sp < 0.0 && sp > -0.3) Writecolortext("Weak Negative", Color.Cyan, false);
+                if (sp <= -0.3 && sp > -0.7) Writecolortext("Moderate Negative", Color.Cyan, false);
+                if (sp <= -0.7 && sp > -1.00) Writecolortext("Strong Negative", Color.Cyan, false);
+
+                Writecolortext(" Correlation", Color.Green, true);
+
+                Writeblankline();
+                Writekeyvalue("ρ-Value = ", "G6", sp);
+                Writekeyvalue("Coefficient of Determination = ", "G6", sp * sp);
                 Writeblankline();
                 Writekeyvalue("P-Value = ", "G6", pr);
 

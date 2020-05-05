@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace HypothesisHelper
 {
@@ -28,7 +29,7 @@ namespace HypothesisHelper
         public struct SDBins
         {
             public double[] values;
-            public int count;
+            public int size;
             public int binsize;
         }
 
@@ -45,109 +46,109 @@ namespace HypothesisHelper
         }
 
         // Calculate average
-        public double Avg(double[] buffer, int count)
+        public double Avg(double[] buffer, int size)
         {
             int i;
             double total = 0;
 
-            for (i = 0; i < count; i++)
+            for (i = 0; i < size; i++)
                 total += buffer[i];
 
-            return total / count;
+            return total / size;
         }
 
         // Calculate median
-        public double Median(double[] buffer, int count)
+        public double Median(double[] buffer, int size)
         {
             double[] srt = (double[])buffer.Clone();
 
             Array.Sort(srt);
-            return srt[count / 2];
+            return srt[size / 2];
         }
 
         // Calculate Standard Deviation of Population
-        public double SDPop(double[] buffer, int count)
+        public double SDPop(double[] buffer, int size)
         {
             double mean, standardDeviation = 0.0;
             int i;
-            mean = Avg(buffer, count);
+            mean = Avg(buffer, size);
 
-            for (i = 0; i < count; ++i)
+            for (i = 0; i < size; ++i)
                 standardDeviation += Math.Pow(buffer[i] - mean, 2);
 
-            return Math.Sqrt(standardDeviation / count);
+            return Math.Sqrt(standardDeviation / size);
         }
 
         // Calculate Standard Deviation of Sample
-        public double SDSamp(double[] buffer, int count)
+        public double SDSamp(double[] buffer, int size)
         {
             double mean, standardDeviation = 0.0;
             int i;
-            mean = Avg(buffer, count);
+            mean = Avg(buffer, size);
 
-            for (i = 0; i < count; ++i)
+            for (i = 0; i < size; ++i)
                 standardDeviation += Math.Pow(buffer[i] - mean, 2);
 
-            return Math.Sqrt(standardDeviation / (count - 1));
+            return Math.Sqrt(standardDeviation / (size - 1));
         }
 
         // Calculate Standard Error of Sample
-        public double StandardError(double[] buffer, int count)
+        public double StandardError(double[] buffer, int size)
         {
-            return SDSamp(buffer, count) / Math.Sqrt(count);
+            return SDSamp(buffer, size) / Math.Sqrt(size);
         }
 
         // Calculate Standard Deviation of Differences
-        public double SDofDifferences(double[] array1, double[] array2, int count)
+        public double SDofDifferences(double[] array1, double[] array2, int size)
         {
             int i;
-            double[] diff = new double[count];
+            double[] diff = new double[size];
 
-            for ( i=0; i<count; i++)
+            for ( i=0; i<size; i++)
             {
                 diff[i] = array2[i] - array1[i];
             }
 
-            return SDSamp(diff, count);
+            return SDSamp(diff, size);
         }
 
         // Calculate Standard Error of Differences
-        public double SEofDifferences(double[] array1, double[] array2, int count)
+        public double SEofDifferences(double[] array1, double[] array2, int size)
         {
             int i;
-            double[] diff = new double[count];
+            double[] diff = new double[size];
 
-            for (i = 0; i < count; i++)
+            for (i = 0; i < size; i++)
             {
                 diff[i] = array2[i] - array1[i];
             }
 
-            return SDSamp(diff, count) / Math.Sqrt(count);
+            return SDSamp(diff, size) / Math.Sqrt(size);
         }
 
         // Calculate Mean of Differences
-        public double MeanofDifferences(double[] array1, double[] array2, int count)
+        public double MeanofDifferences(double[] array1, double[] array2, int size)
         {
             int i;
-            double[] diff = new double[count];
+            double[] diff = new double[size];
 
-            for (i = 0; i < count; i++)
+            for (i = 0; i < size; i++)
             {
                 diff[i] = array2[i] - array1[i];
             }
 
-            return Avg(diff, count);
+            return Avg(diff, size);
         }
 
         // Normalize Array 0 - 1
-        public double[] Normalize(double[] buffer, int count)
+        public double[] Normalize(double[] buffer, int size)
         {
             int i;
-            MMPair minmax = GetMinMax(buffer, count);
+            MMPair minmax = GetMinMax(buffer, size);
 
-            double[] output = new double[count];
+            double[] output = new double[size];
 
-            for ( i=0; i<count; i++)
+            for ( i=0; i<size; i++)
             {
                 output[i] = (buffer[i] - minmax.min) / (minmax.max - minmax.min);
             }
@@ -155,13 +156,41 @@ namespace HypothesisHelper
             return output;
         }
 
-        public SDBins SDMakeBins(double[] buffer, int count)
+        public double[] Rankify(double[] x)
         {
-            int bins = (int)Math.Ceiling(Math.Pow(count, 1.0 / 3.0) * 2); // Rice's rule
-            int bin = 0,x,tbcount = 0,binsize;
+            int i,j;
+            int n = x.Length;
+            double[] rank = new double[n];
+
+            for (i = 0; i < n; i++)
+            {
+                int r = 1, s = 1;
+
+                for (j = 0; j < i; j++)
+                {
+                    if (x[j] < x[i]) r++;
+                    if (x[j] == x[i]) s++;
+                }
+
+                for (j = i + 1; j < n; j++)
+                {
+                    if (x[j] < x[i]) r++;
+                    if (x[j] == x[i]) s++;
+                }
+
+                rank[i] = r + (s - 1) * 0.5;
+            }
+
+            return rank;
+        }
+
+        public SDBins SDMakeBins(double[] buffer, int size)
+        {
+            int bins = (int)Math.Ceiling(Math.Pow(size, 1.0 / 3.0) * 2); // Rice's rule
+            int bin = 0,x,tbsize = 0,binsize;
             SDBins b = new SDBins();
 
-            binsize = count / bins;
+            binsize = size / bins;
             if (binsize < 2) binsize = 2;
 
             b.binsize = binsize;
@@ -169,29 +198,29 @@ namespace HypothesisHelper
             double[] tbuff = new double[binsize];
             b.values = new double[bins + 2];
 
-            for (x = 0; x < count; x++)
+            for (x = 0; x < size; x++)
             {
-                tbuff[tbcount++] = buffer[x];
-                if (tbcount == binsize)
+                tbuff[tbsize++] = buffer[x];
+                if (tbsize == binsize)
                 {
-                    b.values[bin++] = SDPop(tbuff, tbcount);
-                    tbcount = 0;
+                    b.values[bin++] = SDPop(tbuff, tbsize);
+                    tbsize = 0;
                 }
                 
             }
 
-            if (x % binsize > 1) b.values[bin++] = SDPop(tbuff, tbcount);
+            if (x % binsize > 1) b.values[bin++] = SDPop(tbuff, tbsize);
 
-            b.count = bin;
+            b.size = bin;
 
             return b;
         }
 
-        private double[] HSMakeBins(double[] buffer, int count)
+        private double[] HSMakeBins(double[] buffer, int size)
         {
-            int bins = (int)Math.Ceiling(Math.Pow(count, 1.0 / 3.0) * 2); // Rice's rule
+            int bins = (int)Math.Ceiling(Math.Pow(size, 1.0 / 3.0) * 2); // Rice's rule
 
-            MMPair minmax = GetMinMax(buffer, count);
+            MMPair minmax = GetMinMax(buffer, size);
 
             double width = (minmax.max - minmax.min) / bins; 
 
@@ -211,13 +240,13 @@ namespace HypothesisHelper
             return intervals;
         }
 
-        public HSBins SortBins(double[] buffer, int count)
+        public HSBins SortBins(double[] buffer, int size)
         {
             int i, x;
 
             HSBins b = new HSBins();
 
-            int bins = (int)Math.Ceiling(Math.Pow(count, 1.0 / 3.0) * 2);
+            int bins = (int)Math.Ceiling(Math.Pow(size, 1.0 / 3.0) * 2);
 
             b.values = new double[bins];
             b.x = new double[bins];
@@ -225,9 +254,9 @@ namespace HypothesisHelper
 
             for (i = 0; i < bins; i++) b.values[i] = 0.0;
 
-            double[] intervals = HSMakeBins(buffer, count);
+            double[] intervals = HSMakeBins(buffer, size);
 
-            for (x = 0; x < count; x++)
+            for (x = 0; x < size; x++)
             {
                 double v = buffer[x];
                 for (i = 0; i < intervals.Length - 1; i += 2)
@@ -250,17 +279,17 @@ namespace HypothesisHelper
         }
 
         // Calculate R Pearson Correlation Coefficient
-        public double R(double[] x, double[] y, int array_size)
+        public double R(double[] x, double[] y, int size)
         {
             double Mx, My;
             double XMxSum = 0, YMySum = 0;
             double XMxYMySum = 0;
             int i;
 
-            Mx = Avg(x, array_size);
-            My = Avg(y, array_size);
+            Mx = Avg(x, size);
+            My = Avg(y, size);
 
-            for (i=0;i<array_size;i++)
+            for (i = 0; i < size; i++)
             {
                 XMxSum += (x[i] - Mx) * (x[i] - Mx);
                 YMySum += (y[i] - My) * (y[i] - My);
@@ -271,43 +300,43 @@ namespace HypothesisHelper
         }
 
         // Calculate Slope of data
-        public double slope(double[] y, int array_size)
+        public double Slope(double[] y, int size)
         {
             int x;
             double a = 0, b, c = 0, d, b1 = 0, b2 = 0;
             
-            for (x=1;x<array_size+1;x++ )
+            for (x = 1; x < size+1; x++ )
             {
                 a += x * y[x-1];
                 b1 += x;
                 b2 += y[x - 1];
                 c += Math.Pow(x, 2);
             }
-            a *= array_size;
+            a *= size;
            
             b = b1 * b2;
 
-            c *= array_size;
+            c *= size;
 
             d = Math.Pow(b1, 2);
 
             return (a - b) / (c - d);
         }
 
-        public double intercept(double[] y, int array_size)
+        public double Intercept(double[] y, int size)
         {
             int x;
             double e = 0, b = 0, f;
 
-            for (x=1;x<array_size+1;x++)
+            for (x = 1; x < size+1; x++)
             {
                 e += y[x - 1];
                 b += x;
             }
 
-            f = slope(y, array_size) * b;
+            f = Slope(y, size) * b;
 
-            return (e - f) / array_size;
+            return (e - f) / size;
         }
 
         // Calculate of P-Value from Z-Values
@@ -511,86 +540,86 @@ namespace HypothesisHelper
         }
 
         // Calculate P-Value for unpaired Data
-        public double PValueUnpaired(double[] array1, int array1_size, double[] array2, int array2_size)
+        public double PValueUnpaired(double[] array1, int size1, double[] array2, int size2)
         {
             double fmean1, fmean2;
             double usv1 = 0.0, usv2 = 0.0;
 
-            if (array1_size <= 1)
+            if (size1 <= 1)
                 return 1.0;
 
-            if (array2_size <= 1)
+            if (size2 <= 1)
                 return 1.0;
 
 
-            fmean1 = Avg(array1, array1_size);
-            fmean2 = Avg(array2, array2_size);
+            fmean1 = Avg(array1, size1);
+            fmean2 = Avg(array2, size2);
 
             if (fmean1 == fmean2)
                 return 1.0;
 
-            for (int x = 0; x < array1_size; x++)
+            for (int x = 0; x < size1; x++)
             {
                 usv1 += (array1[x] - fmean1) * (array1[x] - fmean1);
             }
 
-            for (int x = 0; x < array2_size; x++)
+            for (int x = 0; x < size2; x++)
             {
                 usv2 += (array2[x] - fmean2) * (array2[x] - fmean2);
             }
 
-            usv1 /= (array1_size - 1);
-            usv2 /= (array2_size - 1);
+            usv1 /= (size1 - 1);
+            usv2 /= (size2 - 1);
 
-            double welch_t_statistic = (fmean1 - fmean2) / Math.Sqrt(usv1 / array1_size + usv2 / array2_size);
-            double dof = Math.Pow((usv1 / array1_size + usv2 / array2_size), 2.0) / ((usv1 * usv1) / (array1_size * array1_size * (array1_size - 1)) + (usv2 * usv2) / (array2_size * array2_size * (array2_size - 1)));
+            double welch_t_statistic = (fmean1 - fmean2) / Math.Sqrt(usv1 / size1 + usv2 / size2);
+            double dof = Math.Pow((usv1 / size1 + usv2 / size2), 2.0) / ((usv1 * usv1) / (size1 * size1 * (size1 - 1)) + (usv2 * usv2) / (size2 * size2 * (size2 - 1)));
 
             return PfromT(welch_t_statistic, dof);
         }
 
         // Calculate P-Value for paired data
-        public double PValuePaired(double[] array1, double[] array2, int array_size)
+        public double PValuePaired(double[] array1, double[] array2, int size)
         {
-            double[] ABdiff = new double[array_size];
+            double[] ABdiff = new double[size];
             double mean;
             double std;
             double welch_t_statistic;
-            double dof = array_size - 1;
+            double dof = size - 1;
             int i;
 
-            for (i = 0; i < array_size; i++) ABdiff[i] = array1[i] - array2[i];
+            for (i = 0; i < size; i++) ABdiff[i] = array1[i] - array2[i];
 
-            mean = Avg(ABdiff, array_size);
-            std = SDPop(ABdiff, array_size);
-            welch_t_statistic = mean / (std / Math.Sqrt(array_size - 1));
+            mean = Avg(ABdiff, size);
+            std = SDPop(ABdiff, size);
+            welch_t_statistic = mean / (std / Math.Sqrt(size - 1));
 
             return PfromT(welch_t_statistic, dof);
         }
 
         // Calculate single P-Value against a mean
-        public double PValue(double[] array1, int array_size, double u)
+        public double PValue(double[] array1, int size, double u)
         {
 
             double mean;
                 double std;
                 double welch_t_statistic;
-                double dof = array_size - 1;
+                double dof = size - 1;
 
-                mean = Avg(array1, array_size);
-                std = SDPop(array1, array_size);
-                welch_t_statistic = (mean - u) / (std / Math.Sqrt(array_size - 1));
+                mean = Avg(array1, size);
+                std = SDPop(array1, size);
+                welch_t_statistic = (mean - u) / (std / Math.Sqrt(size - 1));
 
 	        return PfromT(welch_t_statistic, dof);
            }
 
         // Calculate min and max of an array
-        public MMPair GetMinMax(double[] arr, int n)
+        public MMPair GetMinMax(double[] arr, int size)
             {
 
             MMPair minmax;
             int i;
 
-            if (n % 2 == 0)
+            if (size % 2 == 0)
             {
                 if (arr[0] > arr[1])
                 {
@@ -612,7 +641,7 @@ namespace HypothesisHelper
                 i = 1;
             }
 
-            while (i < n - 1)
+            while (i < size - 1)
             {
                 if (arr[i] > arr[i + 1])
                 {
@@ -638,17 +667,17 @@ namespace HypothesisHelper
         }
 
         // Remove Outlier values from an array
-        public int RemoveOutliersUnpaired(ref double[] inp, int n, double sensitivity)
+        public int RemoveOutliersUnpaired(ref double[] inp, int size, double sensitivity)
         {
             int c = 0;
             int i;
             double test;
-            double a = Avg(inp, n);
-            double std = SDSamp(inp, n);
+            double a = Avg(inp, size);
+            double std = SDSamp(inp, size);
 
-            for (i = 0; i < n; i++)
+            for (i = 0; i < size; i++)
             {
-                test = n * Erfc(Math.Abs(inp[i] - a) / std);
+                test = size * Erfc(Math.Abs(inp[i] - a) / std);
 
                 if (test < sensitivity)
                     Globals.mainform.Writekeyvalue(String.Format("Threw Out #{0} -> ",i+1), "G", inp[i]);
@@ -660,21 +689,21 @@ namespace HypothesisHelper
         }
 
         // Remove Outlier values from two arrays
-        public int RemoveOutliersPaired(ref double[] inp1, ref double[] inp2, int n, double sensitivity)
+        public int RemoveOutliersPaired(ref double[] inp1, ref double[] inp2, int size, double sensitivity)
         {
             int c = 0;
             int i;
             double testa,testb;
-            double a = Avg(inp1, n);
-            double stda = SDSamp(inp1, n);
-            double b = Avg(inp2, n);
-            double stdb = SDSamp(inp2, n);
+            double a = Avg(inp1, size);
+            double stda = SDSamp(inp1, size);
+            double b = Avg(inp2, size);
+            double stdb = SDSamp(inp2, size);
 
 
-            for (i = 0; i < n; i++)
+            for (i = 0; i < size; i++)
             {
-                testa = n * Erfc(Math.Abs(inp1[i] - a) / stda);
-                testb = n * Erfc(Math.Abs(inp2[i] - b) / stdb);
+                testa = size * Erfc(Math.Abs(inp1[i] - a) / stda);
+                testb = size * Erfc(Math.Abs(inp2[i] - b) / stdb);
 
                 if (testa < sensitivity || testb < sensitivity)
                 {

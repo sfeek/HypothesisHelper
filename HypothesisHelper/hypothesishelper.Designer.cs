@@ -45,6 +45,7 @@
             this.chkOutlier = new System.Windows.Forms.CheckBox();
             this.chkPaired = new System.Windows.Forms.CheckBox();
             this.chkNormalize = new System.Windows.Forms.CheckBox();
+            this.chkShowGraphs = new System.Windows.Forms.CheckBox();
             this.gbData.SuspendLayout();
             this.grpResults.SuspendLayout();
             this.SuspendLayout();
@@ -106,7 +107,7 @@
             // 
             this.btnCalculate.Location = new System.Drawing.Point(12, 12);
             this.btnCalculate.Name = "btnCalculate";
-            this.btnCalculate.Size = new System.Drawing.Size(225, 30);
+            this.btnCalculate.Size = new System.Drawing.Size(170, 30);
             this.btnCalculate.TabIndex = 2;
             this.btnCalculate.Text = "Calculate";
             this.btnCalculate.UseVisualStyleBackColor = true;
@@ -114,9 +115,9 @@
             // 
             // btnClear
             // 
-            this.btnClear.Location = new System.Drawing.Point(243, 12);
+            this.btnClear.Location = new System.Drawing.Point(188, 12);
             this.btnClear.Name = "btnClear";
-            this.btnClear.Size = new System.Drawing.Size(150, 30);
+            this.btnClear.Size = new System.Drawing.Size(130, 30);
             this.btnClear.TabIndex = 3;
             this.btnClear.Text = "Clear Data && Results";
             this.btnClear.UseVisualStyleBackColor = true;
@@ -150,9 +151,9 @@
             // 
             // txtConfLevel
             // 
-            this.txtConfLevel.Location = new System.Drawing.Point(723, 32);
+            this.txtConfLevel.Location = new System.Drawing.Point(674, 32);
             this.txtConfLevel.Name = "txtConfLevel";
-            this.txtConfLevel.Size = new System.Drawing.Size(51, 20);
+            this.txtConfLevel.Size = new System.Drawing.Size(32, 20);
             this.txtConfLevel.TabIndex = 4;
             this.txtConfLevel.TabStop = false;
             this.txtConfLevel.Text = "95";
@@ -160,7 +161,7 @@
             // lblConfLevel
             // 
             this.lblConfLevel.AutoSize = true;
-            this.lblConfLevel.Location = new System.Drawing.Point(627, 35);
+            this.lblConfLevel.Location = new System.Drawing.Point(578, 35);
             this.lblConfLevel.Name = "lblConfLevel";
             this.lblConfLevel.Size = new System.Drawing.Size(90, 13);
             this.lblConfLevel.TabIndex = 5;
@@ -170,7 +171,7 @@
             // 
             this.txtPredMean.Location = new System.Drawing.Point(674, 8);
             this.txtPredMean.Name = "txtPredMean";
-            this.txtPredMean.Size = new System.Drawing.Size(100, 20);
+            this.txtPredMean.Size = new System.Drawing.Size(92, 20);
             this.txtPredMean.TabIndex = 6;
             this.txtPredMean.TabStop = false;
             this.txtPredMean.Text = "0.0";
@@ -178,7 +179,7 @@
             // lblPredMean
             // 
             this.lblPredMean.AutoSize = true;
-            this.lblPredMean.Location = new System.Drawing.Point(586, 11);
+            this.lblPredMean.Location = new System.Drawing.Point(578, 11);
             this.lblPredMean.Name = "lblPredMean";
             this.lblPredMean.Size = new System.Drawing.Size(82, 13);
             this.lblPredMean.TabIndex = 7;
@@ -187,7 +188,7 @@
             // chkOutlier
             // 
             this.chkOutlier.AutoSize = true;
-            this.chkOutlier.Location = new System.Drawing.Point(514, 34);
+            this.chkOutlier.Location = new System.Drawing.Point(449, 31);
             this.chkOutlier.Name = "chkOutlier";
             this.chkOutlier.Size = new System.Drawing.Size(101, 17);
             this.chkOutlier.TabIndex = 8;
@@ -197,7 +198,7 @@
             // chkPaired
             // 
             this.chkPaired.AutoSize = true;
-            this.chkPaired.Location = new System.Drawing.Point(417, 34);
+            this.chkPaired.Location = new System.Drawing.Point(351, 31);
             this.chkPaired.Name = "chkPaired";
             this.chkPaired.Size = new System.Drawing.Size(82, 17);
             this.chkPaired.TabIndex = 9;
@@ -207,18 +208,29 @@
             // chkNormalize
             // 
             this.chkNormalize.AutoSize = true;
-            this.chkNormalize.Location = new System.Drawing.Point(417, 11);
+            this.chkNormalize.Location = new System.Drawing.Point(449, 12);
             this.chkNormalize.Name = "chkNormalize";
             this.chkNormalize.Size = new System.Drawing.Size(109, 17);
             this.chkNormalize.TabIndex = 10;
             this.chkNormalize.Text = "Normalize Graphs";
             this.chkNormalize.UseVisualStyleBackColor = true;
             // 
+            // chkShowGraphs
+            // 
+            this.chkShowGraphs.AutoSize = true;
+            this.chkShowGraphs.Location = new System.Drawing.Point(351, 12);
+            this.chkShowGraphs.Name = "chkShowGraphs";
+            this.chkShowGraphs.Size = new System.Drawing.Size(90, 17);
+            this.chkShowGraphs.TabIndex = 11;
+            this.chkShowGraphs.Text = "Show Graphs";
+            this.chkShowGraphs.UseVisualStyleBackColor = true;
+            // 
             // Hypothesishelper
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(784, 561);
+            this.Controls.Add(this.chkShowGraphs);
             this.Controls.Add(this.chkNormalize);
             this.Controls.Add(this.chkPaired);
             this.Controls.Add(this.chkOutlier);
@@ -233,7 +245,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Hypothesishelper";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Hypothesis Helper v2.91";
+            this.Text = "Hypothesis Helper v3.00";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Hypothesishelper_FormClosing);
             this.gbData.ResumeLayout(false);
             this.gbData.PerformLayout();
@@ -261,6 +273,7 @@
         private System.Windows.Forms.CheckBox chkOutlier;
         private System.Windows.Forms.CheckBox chkPaired;
         private System.Windows.Forms.CheckBox chkNormalize;
+        private System.Windows.Forms.CheckBox chkShowGraphs;
     }
 }
 
