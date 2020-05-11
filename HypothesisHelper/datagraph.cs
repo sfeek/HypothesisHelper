@@ -57,13 +57,10 @@ namespace HypothesisHelper
 
                 case 2: // Normalized Line Chart
                     XYchart.ChartAreas["ChartArea1"].AxisX.Title = "Sample Number";
-                    XYchart.ChartAreas["ChartArea1"].AxisY.Title = "Normalized Value";
+                    XYchart.ChartAreas["ChartArea1"].AxisY.Title = "Z-Score";
                     XYchart.ChartAreas["ChartArea1"].AxisX.TextOrientation = TextOrientation.Horizontal;
                     XYchart.ChartAreas["ChartArea1"].AxisX.TitleAlignment = StringAlignment.Center;
                     XYchart.ChartAreas["ChartArea1"].AxisY.TitleAlignment = StringAlignment.Center;
-                    XYchart.ChartAreas["ChartArea1"].AxisY.Interval = 0.2;
-                    XYchart.ChartAreas["ChartArea1"].AxisY.Maximum = 1.0;
-                    XYchart.ChartAreas["ChartArea1"].AxisY.Minimum = 0.0;
                     series = XYchart.Series.Add("X-Y Plot");
                     series.ChartType = SeriesChartType.Line;
                     break;
@@ -75,12 +72,6 @@ namespace HypothesisHelper
                     XYchart.ChartAreas["ChartArea1"].AxisX.TitleAlignment = StringAlignment.Center;
                     XYchart.ChartAreas["ChartArea1"].AxisY.TextOrientation = TextOrientation.Horizontal;
                     XYchart.ChartAreas["ChartArea1"].AxisY.TitleAlignment = StringAlignment.Center;
-                    XYchart.ChartAreas["ChartArea1"].AxisX.Interval = 0.2;
-                    XYchart.ChartAreas["ChartArea1"].AxisY.Interval = 0.2;
-                    XYchart.ChartAreas["ChartArea1"].AxisX.Maximum = 1.0;
-                    XYchart.ChartAreas["ChartArea1"].AxisX.Minimum = 0.0;
-                    XYchart.ChartAreas["ChartArea1"].AxisY.Maximum = 1.0;
-                    XYchart.ChartAreas["ChartArea1"].AxisY.Minimum = 0.0;
                     series = XYchart.Series.Add("X-Y Plot");
                     series.ChartType = SeriesChartType.Point;
                     break;
@@ -120,7 +111,7 @@ namespace HypothesisHelper
                     break;
 
                 case 2:
-                    yn = mf.Normalize(y, y.Length);
+                    yn = mf.ZNormalize(y, y.Length);
 
                     try
                     {
@@ -138,8 +129,8 @@ namespace HypothesisHelper
                     break;
 
                 case 3:  
-                    xn = mf.Normalize(x, x.Length);
-                    yn = mf.Normalize(y, y.Length);
+                    xn = mf.ZNormalize(x, x.Length);
+                    yn = mf.ZNormalize(y, y.Length);
 
                     try
                     {

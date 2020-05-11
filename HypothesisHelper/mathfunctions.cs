@@ -156,6 +156,35 @@ namespace HypothesisHelper
             return output;
         }
 
+        public double[] ZNormalize(double[] buffer, int size)
+        {
+            double[] zn = new double[size];
+            int i;
+            double avg = Avg(buffer, size);
+            double sd = SDPop(buffer, size);
+
+            for (i = 0; i < size; i++)
+            {
+                zn[i] = (buffer[i] - avg) / sd;
+            }
+
+            return zn;
+        }
+
+        public double SumOfSquares(double[] buffer, int size)
+        {
+            int i;
+            double ss = 0;
+            double avg = Avg(buffer, size);
+
+            for ( i=0; i < size; i++)
+            {
+                ss += (buffer[i] - avg) * (buffer[i] - avg);
+            }
+
+            return ss;
+        }
+
         public double[] Rankify(double[] x)
         {
             int i,j;

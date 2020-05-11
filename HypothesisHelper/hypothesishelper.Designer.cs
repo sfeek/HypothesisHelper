@@ -210,9 +210,9 @@
             this.chkNormalize.AutoSize = true;
             this.chkNormalize.Location = new System.Drawing.Point(449, 12);
             this.chkNormalize.Name = "chkNormalize";
-            this.chkNormalize.Size = new System.Drawing.Size(109, 17);
+            this.chkNormalize.Size = new System.Drawing.Size(101, 17);
             this.chkNormalize.TabIndex = 10;
-            this.chkNormalize.Text = "Normalize Graphs";
+            this.chkNormalize.Text = "Z-Score Graphs";
             this.chkNormalize.UseVisualStyleBackColor = true;
             // 
             // chkShowGraphs
@@ -245,7 +245,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Hypothesishelper";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Hypothesis Helper v3.00";
+            this.Text = "Hypothesis Helper v3.02";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Hypothesishelper_FormClosing);
             this.gbData.ResumeLayout(false);
             this.gbData.PerformLayout();

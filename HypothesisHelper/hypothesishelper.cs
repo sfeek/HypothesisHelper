@@ -241,7 +241,7 @@ namespace HypothesisHelper
         void OneSample(double clevel, double mean, double ccfs)
         {
             int countA,x,graph=0;
-            double p, avgA, SDA, SEA, SDAP;
+            double p, avgA, SDA, SEA, SDAP, SS;
             double sig2P, sig1P;
             double[] xpointsA;
 
@@ -297,8 +297,7 @@ namespace HypothesisHelper
 
                 for (x = 1; x < SDbins.size + 1; x++) xpointsA[x - 1] = x * SDbins.binsize;
 
-                if (chkNormalize.Checked) graph = 2;
-                sdA = new Datagraph(graph, "Standard Deviation Plot")
+                sdA = new Datagraph(0, "Standard Deviation Plot")
                 {
                     x = xpointsA,
                     y = SDbins.values,
@@ -339,6 +338,7 @@ namespace HypothesisHelper
             cuA = avgA + Z * (SDA / Math.Sqrt(countA));
             clA = avgA - Z * (SDA / Math.Sqrt(countA));
             SEA = mf.StandardError(bufferA, countA);
+            SS = mf.SumOfSquares(bufferA, countA);
 
             Writeblankline();
             Writekeyvalue("A Count = ", "0", countA);
@@ -380,6 +380,10 @@ namespace HypothesisHelper
             Writeblankline();
             Writekeyvalue("Sample SE A = ", "G6", SEA);
 
+            Writeblankline();
+            
+            Writekeyvalue("Sum of Squares = ", "G6", SS);
+            
             Writeblankline();
             Writekeyvalue("Slope A = ", "G6", mf.Slope(bufferA, countA));
             Writekeyvalue("y-Intercept A = ","G6",mf.Intercept(bufferA, countA));
@@ -425,7 +429,7 @@ namespace HypothesisHelper
             int countA;
             int countB;
             int x, graph = 0;
-            double p, avgA, avgB, SDA, SDB, SEA, SEB, SDAP, SDBP;
+            double p, avgA, avgB, SDA, SDB, SEA, SEB, SDAP, SDBP, SSA, SSB;
             double SED, SDD, cuAD, clAD, MoD;
             double sig2P, sig1P, p1, p2;
             double r, pr, tr, sr, sp;
@@ -528,6 +532,9 @@ namespace HypothesisHelper
             SEA = mf.StandardError(bufferA, countA);
             SEB = mf.StandardError(bufferB, countB);
 
+            SSA = mf.SumOfSquares(bufferA, countA);
+            SSB = mf.SumOfSquares(bufferB, countB);
+
             Writeblankline();
             Writekeyvalue("A Count = ", "0", countA);
             Writekeyvalue("B Count = ", "0", countB);
@@ -623,6 +630,10 @@ namespace HypothesisHelper
             Writekeyvalue("Sample SE B = ", "G6", SEB);
 
             Writeblankline();
+            Writekeyvalue("Sum of Squares A = ", "G6", SSA);
+            Writekeyvalue("Sum of Squares B = ", "G6", SSB);
+
+            Writeblankline();
             Writekeyvalue("Slope A = ", "G6", mf.Slope(bufferA, countA));
             Writekeyvalue("y-Intercept A = ", "G6", mf.Intercept(bufferA, countA));
 
@@ -694,8 +705,7 @@ namespace HypothesisHelper
 
                 for (x = 1; x < SDbinsA.size + 1; x++) xpointsA[x - 1] = x * SDbinsA.binsize;
 
-                if (chkNormalize.Checked) graph = 2;
-                sdA = new Datagraph(graph, "A Standard Deviation Plot")
+                sdA = new Datagraph(0, "A Standard Deviation Plot")
                 {
                     x = xpointsA,
                     y = SDbinsA.values,
@@ -711,8 +721,7 @@ namespace HypothesisHelper
 
                 for (x = 1; x < SDbinsB.size + 1; x++) xpointsA[x - 1] = x * SDbinsB.binsize;
 
-                if (chkNormalize.Checked) graph = 2;
-                sdB = new Datagraph(graph, "B Standard Deviation Plot")
+                sdB = new Datagraph(0, "B Standard Deviation Plot")
                 {
                     x = xpointsA,
                     y = SDbinsB.values,
