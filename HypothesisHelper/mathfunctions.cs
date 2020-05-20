@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace HypothesisHelper
 {
@@ -156,6 +160,128 @@ namespace HypothesisHelper
             return output;
         }
 
+        public double[] Differences(double[] x, double[] y)
+        {
+            int i;
+            double[] z = new double[x.Length];
+
+            for (i = 0; i < x.Length; ++i)
+            {
+                z[i] = y[i] - x[i];
+            }
+
+            return z;
+        }
+
+        public double[] AbsoluteDifferences(double[] z)
+        {
+            int i;
+            double[] zAbs = new double[z.Length];
+
+            for (i = 0; i < z.Length; ++i) {
+                zAbs[i] = Math.Abs(z[i]);
+            }
+
+            return zAbs;
+        }
+
+        private bool PairedDataConformance(double[] x, double[] y)
+        {
+
+            if (x == null || y == null) return true;
+
+            if (x.Length == 0 || y.Length == 0) return true;
+
+            if (y.Length != x.Length) return true;
+
+            return false;
+        }
+
+        public double WilcoxonSignedRank(double[] x, double[] y, ref double Wplus, ref double Wminus)
+        {
+            Wplus = 0;
+            int i;
+
+            if (PairedDataConformance(x, y)) return -1;
+
+            double[] z = Differences(x, y);
+            double[] zAbs = AbsoluteDifferences(z);
+
+            double[] ranks = Rankify(zAbs);
+            
+            for (i = 0; i<z.Length; ++i) 
+            {
+                if (z[i] > 0) Wplus += ranks[i];
+            }
+
+            double N = Convert.ToDouble(x.Length);
+            Wminus = (((N * (N + 1))) / 2.0) - Wplus;
+
+            return Math.Max(Wplus, Wminus);
+        }
+
+        private double WilcoxonExactPValue(double Wmax, int N)
+        {
+            int m = 1 << N;
+
+            int largerRankSums = 0;
+
+            for (int i = 0; i < m; ++i)
+            {
+                int rankSum = 0;
+
+                for (int j = 0; j < N; ++j)
+                {
+                    if (((i >> j) & 1) == 1)
+                    {
+                        rankSum += j + 1;
+                    }
+                }
+
+                if (rankSum >= Wmax)
+                {
+                    ++largerRankSums;
+                }
+            }
+
+            return 2 * ((double)largerRankSums) / ((double)m);
+        }
+
+        public double WilcoxonSignedRankTest(double[] x, double[] y, ref double Wplus, ref double Wminus)
+        {
+            Wplus = 0;
+            Wminus = 0;
+            double Wmax = 0;
+
+            if (PairedDataConformance(x, y)) return -1;
+
+            int N = x.Length;
+            Wmax = WilcoxonSignedRank(x, y, ref Wplus, ref Wminus);
+
+            if (Wmax < 0.0) return -1.0;
+
+            if (N < 31)
+                return WilcoxonExactPValue(Wmax, N);
+            else 
+            {
+                double Wmin = ((double)(N * (N + 1)) / 2.0) - Wmax;
+                return WilcoxonAsymptoticPValue(Wmin, N);
+            }
+        }
+
+        private double WilcoxonAsymptoticPValue(double Wmin, int N)
+        {
+            double ES = (double)(N * (N + 1)) / 4.0;
+
+            double VarS = ES * ((double)(2 * N + 1) / 6.0);
+
+            double z = (Wmin - ES - 0.5) / Math.Sqrt(VarS);
+
+            var chart = new Chart();
+     
+            return 2.0 * chart.DataManipulator.Statistics.NormalDistribution(z);
+        }
+
         public double[] ZNormalize(double[] buffer, int size)
         {
             double[] zn = new double[size];
@@ -170,6 +296,558 @@ namespace HypothesisHelper
 
             return zn;
         }
+
+        public double Skewness(double[] buffer, int size)
+        {
+            int i;
+            double sz = Convert.ToDouble(size);
+            double sk, avg, sdp, tmpsum=0;
+
+            avg = Avg(buffer, size);
+            sdp = Math.Pow(SDSamp(buffer, size),3);
+
+            for (i = 0; i < size; i++)
+            {
+                tmpsum += Math.Pow((buffer[i] - avg), 3) / sdp;
+            }
+
+            sk = (sz / ((sz - 1.0) * (sz - 2.0))) * tmpsum;
+
+            return sk;
+        }
+
+        public double Kurtosis(double[] buffer, int size)
+        {
+            int i;
+            double sz = Convert.ToDouble(size);
+            double kt, avg, sdp, tmpsum = 0;
+
+            avg = Avg(buffer, size);
+            sdp = Math.Pow(SDSamp(buffer, size), 4);
+
+            for (i = 0; i < size; i++)
+            {
+                tmpsum += Math.Pow((buffer[i] - avg), 4) / sdp;
+            }
+
+            kt = (((sz * (sz + 1)) / ((sz - 1.0) * (sz - 2.0) * (sz - 3.0))) * tmpsum) - ((3 * (sz - 1) * (sz - 1)) / ((sz - 2) * (sz - 3)));
+
+            return kt;
+        }
+
+        public double KSTwo(double[] bufferA, int sizeA, double[] bufferB, int sizeB)
+        {
+            if (sizeA < 10 || sizeA > 1024) return -1.0;
+            if (sizeB < 10 || sizeB > 1024) return -1.0;
+
+            double d = 0;
+            double szA = Convert.ToDouble(sizeA);
+            double szB = Convert.ToDouble(sizeB);
+
+            sizeA++;
+            sizeB++;
+
+            int i,j;
+
+            double[] bA = new double[sizeA];
+            double[] bB = new double[sizeB];
+
+            for (i = 1; i < sizeA; i++) bA[i] = bufferA[i-1];
+            for (i = 1; i < sizeB; i++) bB[i] = bufferB[i-1];
+            bA[0] = double.NegativeInfinity;
+            bB[0] = double.NegativeInfinity;
+
+            double[] fA = new double[sizeA];
+            double[] fB = new double[sizeB];
+
+            Array.Sort(bA);
+            Array.Sort(bB);
+
+            for (i = 1; i < sizeA; i++) fA[i] = (double)i / szA;
+            for (i = 1; i < sizeB; i++) fB[i] = (double)i / szB;
+
+            fA[0] = 0.0;
+            fB[0] = 0.0;
+
+            j = 1;
+            for (i = 1; i < sizeA; i++)
+            {
+                for (; j < sizeB; j++)
+                {
+                    if (bB[j] > bA[i])
+                    {
+                        if (Math.Abs(fA[i] - fB[j - 1]) > d) d = Math.Abs(fA[i] - fB[j - 1]);
+                        break;
+                    }
+                }
+            }
+
+            j = 1;
+            for (i = 1; i < sizeB; i++)
+            {
+                for (; j < sizeA; j++)
+                {
+                    if (bA[j] > bB[i])
+                    {
+                        if (Math.Abs(fA[j - 1] - fB[i]) > d) d = Math.Abs(fA[j - 1] - fB[i]);
+                        break;
+                    }
+                }
+            }
+
+            return d;
+        }
+
+        public double KSCritValue(double d, int sizeA, int sizeB, double clevel)
+        {
+            double szA = Convert.ToDouble(sizeA);
+            double szB = Convert.ToDouble(sizeB);
+
+            double p = Math.Sqrt(-Math.Log(clevel / 2) * 0.5) * Math.Sqrt((szA + szB) / (szA * szB));
+            return p;
+        }
+
+        public double KSpValue(double d, int sizeA, int sizeB)
+        {
+            double szA = Convert.ToDouble(sizeA);
+            double szB = Convert.ToDouble(sizeB);
+
+            double t = d * Math.Sqrt(szA * szB / (szA+szB));
+                       
+            return 1 - KSSum(t,1e-20,100000);
+        }
+
+        public double KSSum(double t, double tolerance, int maxIterations)
+        {
+            double x = -2 * t * t;
+            int sign = -1;
+            long i = 1;
+            double partialSum = 0.5;
+            double delta = 1;
+            while (delta > tolerance && i < maxIterations)
+            {
+                delta = Math.Exp(x * i * i);
+                partialSum += sign * delta;
+                sign *= -1;
+                i++;
+            }
+            if (i == maxIterations)
+                return 0;
+            return partialSum * 2;
+        }
+
+
+        public void SWilks(double[] buffer, int size, ref double w, ref double pw, ref int ifault)
+        {
+            /* Algorithm AS R94, Journal of the Royal Statistical Society Series C
+             * (Applied Statistics) vol. 44, no. 4, pp. 547-551 (1995).
+             */
+
+            double[] x = (double[]) buffer.Clone();
+
+            int n = size;
+            int n1 = size;
+            int n2 = size / 2;
+
+            w = 0; 
+
+            double zero = 0.0;
+            double one = 1.0;
+            double two = 2.0;
+            double three = 3.0;
+
+            double z90 = 1.2816;
+            double z95 = 1.6449;
+            double z99 = 2.3263;
+            double zm = 1.7509;
+            double zss = 0.56268;
+            double bf1 = 0.8378;
+            double xx90 = 0.556;
+            double xx95 = 0.622;
+            double sqrth = .70710678;
+            double small_value = 1e-19;
+            double pi6 = 1.909859;
+            double stqr = 1.047198;
+
+            double[] g = { -2.273, .459 };
+            double[] c1 = { 0.0, .221157, -.147981, -2.07119, 4.434685, -2.706056 };
+            double[] c2 = { 0.0, .042981, -.293762, -1.752461, 5.682633, -3.582633 };
+            double[] c3 = { .544, -.39978, .025054, -6.714e-4 };
+            double[] c4 = { 1.3822, -.77857, .062767, -.0020322 };
+            double[] c5 = { -1.5861, -.31082, -.083751, .0038915 };
+            double[] c6 = { -.4803, -.082676, .0030302 };
+            double[] c7 = { .164, .533 };
+            double[] c8 = { .1736, .315 };
+            double[] c9 = { .256, -.00635 };
+
+            double r__1;
+
+            double[] a = new double[n];
+            Array.Sort(x);
+
+            int i, j, ncens, i1, nn2;
+
+            double zbar, ssassx, summ2, ssumm2, gamma, delta, range;
+            double a1, a2, an, bf, ld, m, s, sa, xi, sx, xx, y, w1;
+            double fac, asa, an25, ssa, z90f, sax, zfm, z95f, zsd, z99f, rsn, ssx, xsx;
+
+            pw = 1.0;
+            ifault = 0;
+            if (w >= 0.0)
+            {
+                w = 1.0;
+            }
+            an = (double)(n);
+            nn2 = n / 2;
+            if (n2 < nn2)
+            {
+                ifault = 3;
+                return;
+            }
+            if (n < 3)
+            {
+                ifault = 1;
+                return;
+            }
+
+            if (n == 3)
+            {
+                a[0] = sqrth;
+            }
+            else
+            {
+                an25 = an + .25;
+                summ2 = zero;
+                for (i = 1; i <= n2; ++i)
+                {
+                    a[i - 1] = (double)Ppnd7((i - .375f) / an25, ref ifault);
+                    if (ifault != 0)
+                    {
+                        ifault = 8;
+                        return;
+                    }
+                    summ2 += (a[i - 1] * a[i - 1]);
+                }
+                summ2 *= two;
+                ssumm2 = Math.Sqrt(summ2);
+                rsn = one / Math.Sqrt(an);
+                a1 = Poly(c1, 6, rsn) - a[0] / ssumm2;
+
+                if (n > 5)
+                {
+                    i1 = 3;
+                    a2 = -a[1] / ssumm2 + Poly(c2, 6, rsn);
+                    fac = Math.Sqrt((summ2 - two * a[0] * a[0] - two * a[1] * a[1])
+                                / (one - two * a1 * a1 - two * a2 * a2));
+                    a[1] = a2;
+                }
+                else
+                {
+                    i1 = 2;
+                    fac = Math.Sqrt((summ2 - two * a[0] * a[0]) / (one - two * a1 * a1));
+                }
+                a[0] = a1;
+                for (i = i1; i <= nn2; ++i) a[i - 1] /= -fac;
+            }
+
+            if (n1 < 3)
+            {
+                ifault = 1;
+                return;
+            }
+            ncens = n - n1;
+            if (ncens < 0 || (ncens > 0 && n < 20))
+            {
+                ifault = 4;
+                return;
+            }
+            delta = (double)ncens / an;
+            if (delta > 0.8)
+            {
+                ifault = 5;
+                return;
+            }
+
+            if (w < zero)
+            {
+                w1 = 1.0 + w;
+                ifault = 0;
+                goto L70;
+            }
+
+            range = x[n1 - 1] - x[0];
+            if (range < small_value)
+            {
+                ifault = 6;
+                return;
+            }
+
+            ifault = 0;
+            xx = x[0] / range;
+            sx = xx;
+            sa = -a[0];
+            j = n - 1;
+            for (i = 2; i <= n1; ++i)
+            {
+                xi = x[i - 1] / range;
+                if (xx - xi > small_value)
+                {
+                    ifault = 7;
+                    return;
+                }
+                sx += xi;
+                if (i != j) sa += Sign(1, i - j) * a[Math.Min(i, j) - 1];
+                xx = xi;
+                --j;
+            }
+            if (n > 5000)
+            {
+                ifault = 2;
+            }
+
+            sa /= n1;
+            sx /= n1;
+            ssa = ssx = sax = zero;
+            j = n;
+            for (i = 1; i <= n1; ++i, --j)
+            {
+                if (i != j)
+                    asa = Sign(1, i - j) * a[Math.Min(i, j) - 1] - sa;
+                else
+                    asa = -sa;
+                xsx = x[i - 1] / range - sx;
+                ssa += asa * asa;
+                ssx += xsx * xsx;
+                sax += asa * xsx;
+            }
+
+            ssassx = Math.Sqrt(ssa * ssx);
+            w1 = (ssassx - sax) * (ssassx + sax) / (ssa * ssx);
+        L70:
+            w = 1.0 - w1;
+
+            if (n == 3)
+            {
+                pw = pi6 * (Math.Asin(Math.Sqrt(w)) - stqr);
+                return;
+            }
+            y = Math.Log(w1);
+            xx = Math.Log(an);
+            m = zero;
+            s = one;
+            if (n <= 11)
+            {
+                gamma = Poly(g, 2, an);
+                if (y >= gamma)
+                {
+                    pw = small_value;
+                    return;
+                }
+                y = -Math.Log(gamma - y);
+                m = Poly(c3, 4, an);
+                s = Math.Exp(Poly(c4, 4, an));
+            }
+            else
+            {
+                m = Poly(c5, 4, xx);
+                s = Math.Exp(Poly(c6, 3, xx));
+            }
+            
+            if (ncens > 0)
+            {
+                ld = -Math.Log(delta);
+                bf = one + xx * bf1;
+                r__1 = Math.Pow(xx90, (double)xx);
+                z90f = z90 + bf * Math.Pow(Poly(c7, 2, r__1), (double)ld);
+                r__1 = Math.Pow(xx95, (double)xx);
+                z95f = z95 + bf * Math.Pow(Poly(c8, 2, r__1), (double)ld);
+                z99f = z99 + bf * Math.Pow(Poly(c9, 2, xx), (double)ld);
+
+                zfm = (z90f + z95f + z99f) / three;
+                zsd = (z90 * (z90f - zfm) +
+                            z95 * (z95f - zfm) + z99 * (z99f - zfm)) / zss;
+                zbar = zfm - zsd * zm;
+                m += zbar * s;
+                s *= zsd;
+            }
+            pw = Alnorm((y - m) / s, true);
+
+            // Results are returned in w, pw and ifault
+            return;
+        } 
+
+        double Ppnd7(double p, ref int ifault)
+        {
+            /* Algorithm AS 241, Journal of the Royal Statistical Society Series C
+             * (Applied Statistics) vol. 26, no. 3, pp. 118-121 (1977).
+             */
+
+            double zero = 0.0;
+            double one = 1.0;
+            double half = 0.5;
+            double split1 = 0.425;
+            double split2 = 5.0;
+            double const1 = 0.180625;
+            double const2 = 1.6;
+            double a0 = 3.3871327179E+00;
+            double a1 = 5.0434271938E+01;
+            double a2 = 1.5929113202E+02;
+            double a3 = 5.9109374720E+01;
+            double b1 = 1.7895169469E+01;
+            double b2 = 7.8757757664E+01;
+            double b3 = 6.7187563600E+01;
+            double c0 = 1.4234372777E+00;
+            double c1 = 2.7568153900E+00;
+            double c2 = 1.3067284816E+00;
+            double c3 = 1.7023821103E-01;
+            double d1 = 7.3700164250E-01;
+            double d2 = 1.2021132975E-01;
+            double e0 = 6.6579051150E+00;
+            double e1 = 3.0812263860E+00;
+            double e2 = 4.2868294337E-01;
+            double e3 = 1.7337203997E-02;
+            double f1 = 2.4197894225E-01;
+            double f2 = 1.2258202635E-02;
+
+            double normal_dev;
+            double q;
+            double r;
+
+            ifault = 0;
+            q = p - half;
+            if (Math.Abs(q) <= split1)
+            {
+                r = const1 - q * q;
+                normal_dev = q * (((a3 * r + a2) * r + a1) * r + a0) /
+                             (((b3 * r + b2) * r + b1) * r + one);
+                return normal_dev;
+            }
+            else
+            {
+                if (q < zero)
+                {
+                    r = p;
+                }
+                else
+                {
+                    r = one - p;
+                }
+                if (r <= zero)
+                {
+                    ifault = 1;
+                    normal_dev = zero;
+                    return normal_dev;
+                }
+                r = Math.Sqrt(-Math.Log(r));
+                if (r <= split2)
+                {
+                    r -= const2;
+                    normal_dev = (((c3 * r + c2) * r + c1) * r + c0) / ((d2 * r + d1) * r + one);
+                }
+                else
+                {
+                    r -= split2;
+                    normal_dev = (((e3 * r + e2) * r + e1) * r + e0) / ((f2 * r + f1) * r + one);
+                }
+                if (q < zero) { normal_dev = -normal_dev; }
+                return normal_dev;
+            }
+        }
+
+        double Alnorm(double x, bool upper)
+        {
+            /* Algorithm AS 66, Journal of the Royal Statistical Society Series C
+             * (Applied Statistics) vol. 22, pp. 424-427 (1973).
+             */
+
+            double zero = 0;
+            double one = 1;
+            double half = 0.5;
+            double con = 1.28;
+            double ltone = 7.0;
+            double utzero = 18.66;
+            double p = 0.398942280444;
+            double q = 0.39990348504;
+            double r = 0.398942280385;
+            double a1 = 5.75885480458;
+            double a2 = 2.62433121679;
+            double a3 = 5.92885724438;
+            double b1 = -29.8213557807;
+            double b2 = 48.6959930692;
+            double c1 = -3.8052E-8;
+            double c2 = 3.98064794E-4;
+            double c3 = -0.151679116635;
+            double c4 = 4.8385912808;
+            double c5 = 0.742380924027;
+            double c6 = 3.99019417011;
+            double d1 = 1.00000615302;
+            double d2 = 1.98615381364;
+            double d3 = 5.29330324926;
+            double d4 = -15.1508972451;
+            double d5 = 30.789933034;
+
+            double alnorm;
+            double z;
+            double y;
+            bool up = upper;
+            z = x;
+            if (z < zero)
+            {
+                up = !up;
+                z = -z;
+            }
+            if (z <= ltone || (up && z <= utzero))
+            {
+                y = half * z * z;
+                if (z > con)
+                {
+                    alnorm = r * Math.Exp(-y) / (z + c1 + d1 / (z + c2 + d2 / (z + c3 + d3
+                            / (z + c4 + d4 / (z + c5 + d5 / (z + c6))))));
+                }
+                else
+                {
+                    alnorm = half - z * (p - q * y / (y + a1 + b1 / (y + a2 + b2 / (y + a3))));
+                }
+            }
+            else
+            {
+                alnorm = zero;
+            }
+
+            if (!up) { alnorm = one - alnorm; }
+            return alnorm;
+        }
+
+        long Sign(long x, long y)
+        {
+            if (y < 0)
+                return -Math.Abs(x);
+            else
+                return Math.Abs(x);
+        }
+
+        double Poly(double[] cc, int nord, double x)
+        {
+            /* Algorithm AS 181.2   Appl. Statist.  (1982) Vol. 31, No. 2
+  
+                Calculates the algebraic polynomial of order nord-1 with
+                array of coefficients cc.  Zero order coefficient is cc(1) = cc[0]
+            */
+            int j;
+            double p, ret_val;
+
+            ret_val = cc[0];
+
+            if (nord > 1) 
+            {
+                p = x* cc[nord - 1];
+                for (j = nord - 2; j > 0; j--)
+                    p = (p + cc[j]) * x;
+  
+                ret_val += p;
+            }
+            return ret_val;
+        } 
 
         public double SumOfSquares(double[] buffer, int size)
         {

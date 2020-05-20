@@ -88,6 +88,7 @@
             // txtBData
             // 
             this.txtBData.Location = new System.Drawing.Point(379, 41);
+            this.txtBData.MaxLength = 0;
             this.txtBData.Multiline = true;
             this.txtBData.Name = "txtBData";
             this.txtBData.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -97,6 +98,7 @@
             // txtAData
             // 
             this.txtAData.Location = new System.Drawing.Point(6, 41);
+            this.txtAData.MaxLength = 0;
             this.txtAData.Multiline = true;
             this.txtAData.Name = "txtAData";
             this.txtAData.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -245,7 +247,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Hypothesishelper";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Hypothesis Helper v3.02";
+            this.Text = "Hypothesis Helper v3.10";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Hypothesishelper_FormClosing);
             this.gbData.ResumeLayout(false);
             this.gbData.PerformLayout();

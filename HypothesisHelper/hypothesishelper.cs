@@ -241,9 +241,11 @@ namespace HypothesisHelper
         void OneSample(double clevel, double mean, double ccfs)
         {
             int countA,x,graph=0;
-            double p, avgA, SDA, SEA, SDAP, SS;
+            double p, avgA, SDA, SEA, SDAP, SS, SK, KT;
             double sig2P, sig1P;
             double[] xpointsA;
+            double w = 0, pw = 0;
+            int ifault = 0;
 
             MathFunctions.MMPair minmaxA;
             MathFunctions.HSBins HSbins;
@@ -339,6 +341,10 @@ namespace HypothesisHelper
             clA = avgA - Z * (SDA / Math.Sqrt(countA));
             SEA = mf.StandardError(bufferA, countA);
             SS = mf.SumOfSquares(bufferA, countA);
+            SK = mf.Skewness(bufferA, countA);
+            KT = mf.Kurtosis(bufferA, countA);
+            mf.SWilks(bufferA, countA, ref w, ref pw, ref ifault);
+            
 
             Writeblankline();
             Writekeyvalue("A Count = ", "0", countA);
@@ -383,13 +389,24 @@ namespace HypothesisHelper
             Writeblankline();
             
             Writekeyvalue("Sum of Squares = ", "G6", SS);
-            
-            Writeblankline();
-            Writekeyvalue("Slope A = ", "G6", mf.Slope(bufferA, countA));
-            Writekeyvalue("y-Intercept A = ","G6",mf.Intercept(bufferA, countA));
 
             Writeblankline();
+            Writekeyvalue("Skewness = ", "G6", SK);
+            Writekeyvalue("Kurtosis = ", "G6", KT);
+
             Writeblankline();
+            Writekeyvalue("Slope A = ", "G6", mf.Slope(bufferA, countA));
+            Writekeyvalue("y-Intercept A = ", "G6", mf.Intercept(bufferA, countA));
+            Writeblankline();
+
+            if (ifault == 0)
+            {
+                Writecolortext("*** Shapiro Wilk Normality Test ***", Color.Blue, true);
+                Writekeyvalue("A = ", "G6", w);
+                Writekeyvalue("A p-Value = ", "G6", pw);
+                Writeblankline();
+            }
+
             Writecolortext("*** Welch t-test ***", Color.Blue, true);
 
             p = mf.PValue(bufferA, countA, mean);
@@ -428,11 +445,11 @@ namespace HypothesisHelper
         {
             int countA;
             int countB;
-            int x, graph = 0;
+            int x, graph = 0, ifaultA = 0, ifaultB = 0;
             double p, avgA, avgB, SDA, SDB, SEA, SEB, SDAP, SDBP, SSA, SSB;
-            double SED, SDD, cuAD, clAD, MoD;
+            double SED, SDD, cuAD, clAD, MoD, SKA, SKB, KTA, KTB;
             double sig2P, sig1P, p1, p2;
-            double r, pr, tr, sr, sp;
+            double r, pr, tr, sr, sp, wA = 0.0, pwA = 0.0, wB = 0.0, pwB = 0.0;
 
             MathFunctions.MMPair minmaxA;
             MathFunctions.MMPair minmaxB;
@@ -535,6 +552,16 @@ namespace HypothesisHelper
             SSA = mf.SumOfSquares(bufferA, countA);
             SSB = mf.SumOfSquares(bufferB, countB);
 
+            SKA = mf.Skewness(bufferA, countA);
+            SKB = mf.Skewness(bufferB, countB);
+            KTA = mf.Kurtosis(bufferA, countA);
+            KTB = mf.Kurtosis(bufferB, countB);
+
+            mf.SWilks(bufferA, countA, ref wA, ref pwA, ref ifaultA);
+            mf.SWilks(bufferB, countB, ref wB, ref pwB, ref ifaultB);
+
+            double d = mf.KSTwo(bufferA, countA, bufferB, countB);
+
             Writeblankline();
             Writekeyvalue("A Count = ", "0", countA);
             Writekeyvalue("B Count = ", "0", countB);
@@ -634,6 +661,13 @@ namespace HypothesisHelper
             Writekeyvalue("Sum of Squares B = ", "G6", SSB);
 
             Writeblankline();
+            Writekeyvalue("Skewness A = ", "G6", SKA);
+            Writekeyvalue("Skewbess B = ", "G6", SKB);
+            Writeblankline();
+            Writekeyvalue("Kurtosis = ", "G6", KTA);
+            Writekeyvalue("Kurtosis = ", "G6", KTB);
+
+            Writeblankline();
             Writekeyvalue("Slope A = ", "G6", mf.Slope(bufferA, countA));
             Writekeyvalue("y-Intercept A = ", "G6", mf.Intercept(bufferA, countA));
 
@@ -642,6 +676,60 @@ namespace HypothesisHelper
             Writekeyvalue("y-Intercept B = ", "G6", mf.Intercept(bufferB, countB));
 
             Writeblankline();
+            Writecolortext("*** Shapiro Wilk Normality Test ***", Color.Blue, true);
+            if (ifaultA == 0)
+            {
+                Writekeyvalue("A W = ", "G6", wA);
+                Writekeyvalue("A p-Value = ", "G6", pwA);
+            }
+
+            if (ifaultB == 0)
+            {
+                Writekeyvalue("B W = ", "G6", wB);
+                Writekeyvalue("B p-Value = ", "G6", pwB);
+            }
+
+            if (!chkPaired.Checked)
+            {
+                if (d > -1.0)
+                {
+                    double KSCrit = mf.KSCritValue(d, countA, countB, clevel);
+
+                    Writeblankline();
+                    Writecolortext("*** Kolmogorov-Smirnov Two Sample Test UnPaired ***", Color.Blue, true);
+                    Writekeyvalue("D = ", "G6", d);
+                    Writekeyvalue("D Critical = ", "G6", KSCrit);
+                    Writekeyvalue("P-Value = ", "G6", mf.KSpValue(d, countA, countB));
+
+                    Writecolortext("Null Hypothesis is", Color.Green, false);
+                    if (d > KSCrit)
+                        Writecolortext(" FALSE ", Color.Cyan, true);
+                    else
+                        Writecolortext(" TRUE ", Color.Cyan, true);
+                }
+            } 
+            else
+            {
+                double Wplus = 0, Wminus = 0;
+                double wP = mf.WilcoxonSignedRankTest(bufferA, bufferB, ref Wplus, ref Wminus);
+
+                if (wP > -1.0)
+                {
+
+                    Writeblankline();
+                    Writecolortext("*** Wilcoxon Signed Rank Test Paired ***", Color.Blue, true);
+                    Writekeyvalue("W Positive = ", "G6", Wplus);
+                    Writekeyvalue("W Negative = ", "G6", Wminus);
+                    Writekeyvalue("P-Value = ", "G6", wP);
+
+                    Writecolortext("Null Hypothesis is", Color.Green, false);
+                    if (wP <= clevel)
+                        Writecolortext(" FALSE ", Color.Cyan, true);
+                    else
+                        Writecolortext(" TRUE ", Color.Cyan, true);
+                }
+            }
+
             Writeblankline();
 
             if (chkShowGraphs.Checked == true)
@@ -802,7 +890,6 @@ namespace HypothesisHelper
                     dg.Visible = true;
                 }
 
-                Writeblankline();
                 Writeblankline();
                 Writecolortext("*** Welch t-test Paired ***", Color.Blue, true);
 
