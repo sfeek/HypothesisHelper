@@ -662,7 +662,7 @@ namespace HypothesisHelper
 
             Writeblankline();
             Writekeyvalue("Skewness A = ", "G6", SKA);
-            Writekeyvalue("Skewbess B = ", "G6", SKB);
+            Writekeyvalue("Skewness B = ", "G6", SKB);
             Writeblankline();
             Writekeyvalue("Kurtosis = ", "G6", KTA);
             Writekeyvalue("Kurtosis = ", "G6", KTB);
