@@ -1,14 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Security.Permissions;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+
 
 namespace HypothesisHelper
 {
@@ -280,6 +273,79 @@ namespace HypothesisHelper
             var chart = new Chart();
      
             return 2.0 * chart.DataManipulator.Statistics.NormalDistribution(z);
+        }
+
+        public double CohensD(double[] bufferA, int sizeA, double[] bufferB, int sizeB)
+        {
+            double szA = Convert.ToDouble(sizeA);
+            double szB = Convert.ToDouble(sizeB);
+            double avgA = Avg(bufferA, sizeA);
+            double avgB = Avg(bufferB, sizeB);
+            double sdA = SDSamp(bufferA, sizeA);
+            double sdB = SDSamp(bufferB, sizeB);
+            double SDPooled = Math.Sqrt((sdA*sdA + sdB*sdB)/2);
+
+            double D = (avgB - avgA) / SDPooled;
+
+            return D;
+        }
+
+        public double GlassDelta(double[] bufferA, int sizeA, double[] bufferB, int sizeB)
+        {
+            double szA = Convert.ToDouble(sizeA);
+            double szB = Convert.ToDouble(sizeB);
+            double avgA = Avg(bufferA, sizeA);
+            double avgB = Avg(bufferB, sizeB);
+            double sdA = SDSamp(bufferA, sizeA);
+            double sdB = SDSamp(bufferB, sizeB);
+
+            double D = (avgB - avgA) / sdA;
+
+            return D;
+        }
+
+        public double HedgesG(double[] bufferA, int sizeA, double[] bufferB, int sizeB)
+        {
+            double D;
+            double bias;
+            double szA = Convert.ToDouble(sizeA);
+            double szB = Convert.ToDouble(sizeB);
+            double avgA = Avg(bufferA, sizeA);
+            double avgB = Avg(bufferB, sizeB);
+            double sdA = SDSamp(bufferA, sizeA);
+            double sdB = SDSamp(bufferB, sizeB);
+            double SDPooled = Math.Sqrt(((szA - 1.0)*sdA*sdA + (szB - 1.0)*sdB*sdB) / (szA + szB - 2));
+
+            if ( (sizeA + sizeB) < 40) // Bias correction for small sample sizes < 40
+            {
+                bias = J(szA + szB - 2);
+                D = (avgB - avgA) / SDPooled * bias;
+            }
+            else
+                D = (avgB - avgA) / SDPooled;
+
+            return D;
+        }
+
+        private double J(double x)
+        {
+            return gamma(x/2)/(Math.Sqrt(x/2)*gamma((x-1)/2));
+        }
+
+        public double gamma(double z)
+        {
+            double t = z + 6.5;
+            double x = 0.99999999999980993 +
+                    676.5203681218851 / z -
+                    1259.1392167224028 / (z + 1) +
+                    771.32342877765313 / (z + 2) -
+                    176.61502916214059 / (z + 3) +
+                    12.507343278686905 / (z + 4) -
+                    .13857109526572012 / (z + 5) +
+                    9.9843695780195716e-6 / (z + 6) +
+                    1.5056327351493116e-7 / (z + 7);
+
+            return Math.Sqrt(2) * Math.Sqrt(Math.PI) * Math.Pow(t, z - .5) * Math.Exp(-t) * x;
         }
 
         public double[] ZNormalize(double[] buffer, int size)

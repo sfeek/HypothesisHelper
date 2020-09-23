@@ -241,7 +241,7 @@ namespace HypothesisHelper
         void OneSample(double clevel, double mean, double ccfs)
         {
             int countA,x,graph=0;
-            double p, avgA, SDA, SEA, SDAP, SS, SK, KT;
+            double p, avgA, SDA, SEA, SDAP, SS, SK, KT, CD;
             double sig2P, sig1P;
             double[] xpointsA;
             double w = 0, pw = 0;
@@ -344,8 +344,8 @@ namespace HypothesisHelper
             SK = mf.Skewness(bufferA, countA);
             KT = mf.Kurtosis(bufferA, countA);
             mf.SWilks(bufferA, countA, ref w, ref pw, ref ifault);
+            CD = (avgA - mean) / SDA;      
             
-
             Writeblankline();
             Writekeyvalue("A Count = ", "0", countA);
 
@@ -397,6 +397,10 @@ namespace HypothesisHelper
             Writeblankline();
             Writekeyvalue("Slope A = ", "G6", mf.Slope(bufferA, countA));
             Writekeyvalue("y-Intercept A = ", "G6", mf.Intercept(bufferA, countA));
+
+            Writeblankline();
+            Writekeyvalue("Cohen's d = ", "G6", CD);
+
             Writeblankline();
 
             if (ifault == 0)
@@ -561,6 +565,9 @@ namespace HypothesisHelper
             mf.SWilks(bufferB, countB, ref wB, ref pwB, ref ifaultB);
 
             double d = mf.KSTwo(bufferA, countA, bufferB, countB);
+            double CD = mf.CohensD(bufferA, countA, bufferB, countB);
+            double GlassDelta = mf.GlassDelta(bufferA, countA, bufferB, countB);
+            double HedgesG = mf.HedgesG(bufferA, countA, bufferB, countB);
 
             Writeblankline();
             Writekeyvalue("A Count = ", "0", countA);
@@ -674,6 +681,11 @@ namespace HypothesisHelper
             Writeblankline();
             Writekeyvalue("Slope B = ", "G6", mf.Slope(bufferB, countB));
             Writekeyvalue("y-Intercept B = ", "G6", mf.Intercept(bufferB, countB));
+
+            Writeblankline();
+            Writekeyvalue("Cohen's d = ", "G6", CD);
+            Writekeyvalue("Glass Delta = ", "G6", GlassDelta);
+            Writekeyvalue("Hedges's g = ", "G6", HedgesG);
 
             Writeblankline();
             Writecolortext("*** Shapiro Wilk Normality Test ***", Color.Blue, true);
